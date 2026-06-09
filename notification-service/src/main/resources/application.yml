@@ -1,0 +1,94 @@
+spring:
+  application:
+    name: notification-service
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      acks: all
+      retries: 3
+      compression-type: snappy
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      max-poll-records: ${KAFKA_MAX_POLL_RECORDS:100}
+      session-timeout-ms: ${KAFKA_SESSION_TIMEOUT_MS:30000}
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      group-id: notif-svc
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost:5432}/notification_db
+    username: ${DB_USER:notif_user}
+    password: ${DB_PASSWORD:notif_password}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  autoconfigure:
+    exclude: []
+
+retry:
+  scheduler:
+    interval-ms: ${RETRY_SCHEDULER_INTERVAL_MS:30000}
+    initial-delay-ms: ${RETRY_SCHEDULER_INITIAL_DELAY_MS:10000}
+
+server:
+  port: ${SERVER_PORT:8001}
+
+logging:
+  level:
+    root: INFO
+    notification: DEBUG
+    org.springframework.kafka: INFO
+    org.springframework.data: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+sendgrid:
+  api-key: ${SENDGRID_API_KEY:mock-key}
+  from-email: ${SENDGRID_FROM_EMAIL:noreply@notification-platform.com}
+
+twilio:
+  account-sid: ${TWILIO_ACCOUNT_SID:mock-sid}
+  auth-token: ${TWILIO_AUTH_TOKEN:mock-token}
+  from-number: ${TWILIO_FROM_NUMBER:+1234567890}
+
+firebase:
+  enabled: ${FIREBASE_ENABLED:false}
+  project-id: ${FIREBASE_PROJECT_ID:mock-project}
+
+webhook:
+  timeout-ms: ${WEBHOOK_TIMEOUT_MS:5000}
+  max-retries: ${WEBHOOK_MAX_RETRIES:1}
+
+idempotency:
+  ttl-hours: ${IDEMPOTENCY_TTL_HOURS:24}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+
