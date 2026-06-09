@@ -3,8 +3,9 @@ package template.application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import template.adapter.postgres.entity.TemplateEntity;
+import template.adapter.postgres.repository.TemplateEntityRepository;
 import template.domain.Template;
-import template.domain.TemplateRepository;
 
 import java.util.Map;
 import java.util.Optional;
@@ -19,9 +20,9 @@ public class GetTemplateUseCase {
 
     private static final Logger log = LoggerFactory.getLogger(GetTemplateUseCase.class);
 
-    private final TemplateRepository repository;
+    private final TemplateEntityRepository repository;
 
-    public GetTemplateUseCase(TemplateRepository repository) {
+    public GetTemplateUseCase(TemplateEntityRepository repository) {
         this.repository = repository;
     }
 
@@ -52,15 +53,29 @@ public class GetTemplateUseCase {
     public Template getTemplate(String templateId) {
         log.debug("[TEMPLATE] Retrieving template: templateId={}", templateId);
 
-        Optional<Template> template = repository.findActiveById(templateId);
+        Optional<TemplateEntity> entity = repository.findByIdAndActiveTrue(templateId);
 
-        if (template.isEmpty()) {
+        if (entity.isEmpty()) {
             log.warn("[NOT_FOUND] Template not found or inactive: templateId={}", templateId);
             throw new TemplateNotFoundException("Template not found: " + templateId);
         }
 
-        log.debug("[SUCCESS] Template retrieved: templateId={}, eventType={}", templateId, template.get().eventType());
-        return template.get();
+        TemplateEntity te = entity.get();
+
+        Template template = new Template(
+                te.getId(),
+                te.getEventType(),
+                te.getName(),
+                te.getSubject(),
+                te.getBody(),
+                te.getVersion(),
+                te.getActive(),
+                te.getCreatedAt(),
+                te.getUpdatedAt()
+        );
+
+        log.debug("[SUCCESS] Template retrieved: templateId={}, eventType={}", templateId, template.eventType());
+        return template;
     }
 
     /**
@@ -70,6 +85,6 @@ public class GetTemplateUseCase {
      * @return true if exists and active, false otherwise
      */
     public boolean templateExists(String templateId) {
-        return repository.findActiveById(templateId).isPresent();
+        return repository.findByIdAndActiveTrue(templateId).isPresent();
     }
 }

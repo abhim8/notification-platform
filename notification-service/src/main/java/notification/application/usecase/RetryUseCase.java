@@ -58,7 +58,13 @@ public class RetryUseCase {
                         delivery.eventId(), attemptCount, delivery.channel());
                 dlqCount++;
                 // Mark as DLQ (will be handled by infrastructure layer to publish to DLQ topic)
-                log.warn("[DLQ] Delivery should be published to DLQ by the retry adapter: eventId={}", delivery.eventId());
+                attemptRecorder.recordAttempt(
+                        delivery.eventId(),
+                        delivery.channel(),
+                        DeliveryStatus.DLQ,
+                        null,
+                        "Exhausted retries"
+                );
                 continue;
             }
 
@@ -77,8 +83,13 @@ public class RetryUseCase {
             log.info("[RETRY] Retrying delivery: eventId={}, channel={}, attempt={}",
                     delivery.eventId(), delivery.channel(), attemptCount + 1);
 
-            log.info("[RETRY] Delivery is ready for retry: eventId={}, channel={}",
-                    delivery.eventId(), delivery.channel());
+            attemptRecorder.recordAttempt(
+                    delivery.eventId(),
+                    delivery.channel(),
+                    DeliveryStatus.RETRYING,
+                    null,
+                    null
+            );
             retryCount++;
         }
 
@@ -108,5 +119,4 @@ public class RetryUseCase {
         long lastAttemptTime
     ) {}
 }
-
 

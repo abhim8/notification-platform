@@ -118,7 +118,7 @@ public class SendNotificationUseCase {
 
                 // Record attempt
                 attemptRecorder.recordAttempt(
-                        event,
+                        event.eventId(),
                         channel,
                         result.success() ? DeliveryStatus.DELIVERED : DeliveryStatus.FAILED,
                         result.messageId(),
@@ -143,8 +143,7 @@ public class SendNotificationUseCase {
      * Port for recording delivery attempts in the database
      */
     public interface DeliveryAttemptRecorder {
-        void recordAttempt(NotificationEvent event, Channel channel, DeliveryStatus status,
+        void recordAttempt(String eventId, Channel channel, DeliveryStatus status,
                           String messageId, String errorMessage);
     }
 }
-

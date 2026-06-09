@@ -1,7 +1,9 @@
 package notification.infrastructure.shedlock.config;
 
-import net.javacrumbs.shedlock.core.LockProvider;
-import net.javacrumbs.shedlock.provider.jdbc.JdbcLockProvider;
+import net.javacrumbs.shedlock.core.LockConfiguration;
+import net.javacrumbs.shedlock.core.SimpleLock;
+import net.javacrumbs.shedlock.spring.LockableTaskScheduler;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.TaskScheduler;
@@ -9,7 +11,7 @@ import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
-import javax.sql.DataSource;
+import java.time.Instant;
 
 /**
  * ShedLock configuration for distributed scheduled tasks.
@@ -39,8 +41,4 @@ public class ShedLockConfig implements SchedulingConfigurer {
         return scheduler;
     }
 
-    @Bean
-    public LockProvider lockProvider(DataSource dataSource) {
-        return new JdbcLockProvider(dataSource);
-    }
 }

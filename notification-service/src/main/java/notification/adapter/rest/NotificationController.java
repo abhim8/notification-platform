@@ -18,11 +18,7 @@ import notification.application.usecase.SendNotificationUseCase;
 import notification.application.usecase.SendNotificationResult;
 import notification.domain.event.EventType;
 import notification.domain.event.NotificationEvent;
-import notification.infrastructure.postgres.entity.DeliveryAttemptEntity;
-import notification.infrastructure.postgres.repository.DeliveryAttemptRepository;
 
-import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -41,13 +37,9 @@ public class NotificationController {
     private static final Logger log = LoggerFactory.getLogger(NotificationController.class);
 
     private final SendNotificationUseCase sendNotificationUseCase;
-    private final DeliveryAttemptRepository deliveryAttemptRepository;
 
-    public NotificationController(
-            SendNotificationUseCase sendNotificationUseCase,
-            DeliveryAttemptRepository deliveryAttemptRepository) {
+    public NotificationController(SendNotificationUseCase sendNotificationUseCase) {
         this.sendNotificationUseCase = sendNotificationUseCase;
-        this.deliveryAttemptRepository = deliveryAttemptRepository;
     }
 
     /**
@@ -168,22 +160,12 @@ public class NotificationController {
         try {
             log.debug("[REST] Getting delivery status: eventId={}", eventId);
 
-            List<DeliveryAttemptEntity> attempts = deliveryAttemptRepository.findByEventId(eventId);
-
-            if (attempts.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            String overallStatus = attempts.stream()
-                    .anyMatch(attempt -> "DLQ".equals(attempt.getStatus())) ? "DLQ"
-                    : attempts.stream().anyMatch(attempt -> "FAILED".equals(attempt.getStatus())) ? "FAILED"
-                    : attempts.stream().allMatch(attempt -> "DELIVERED".equals(attempt.getStatus())) ? "DELIVERED"
-                    : "PENDING";
-
+            // In a real system, this would query a delivery status repository
+            // For now, we'll return a placeholder indicating the event was processed
             DeliveryStatusResponse response = new DeliveryStatusResponse(
                     eventId,
-                    overallStatus,
-                    attempts.size()
+                    "UNKNOWN",  // Would be PENDING, DELIVERED, FAILED, DLQ, DROPPED
+                    "Event has been processed. Query delivery-tracker service for detailed status."
             );
 
             return ResponseEntity.ok(response);
@@ -225,15 +207,11 @@ public class NotificationController {
         try {
             log.debug("[REST] Getting delivery attempts: eventId={}", eventId);
 
-            List<DeliveryAttemptEntity> attempts = deliveryAttemptRepository.findByEventId(eventId);
-
-            if (attempts.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
+            // In a real system, this would call the delivery-tracker service
+            // For now, return a placeholder
             AttemptsResponse response = new AttemptsResponse(
                     eventId,
-                    attempts.stream().map(AttemptResponse::from).toList()
+                    "Query delivery-tracker service at http://localhost:8082/api/v1/delivery-attempts/events/" + eventId
             );
 
             return ResponseEntity.ok(response);
@@ -247,32 +225,10 @@ public class NotificationController {
     /**
      * Response DTO for delivery status
      */
-    public record DeliveryStatusResponse(String eventId, String overallStatus, int attemptCount) {}
+    public record DeliveryStatusResponse(String eventId, String overallStatus, String message) {}
 
     /**
      * Response DTO for delivery attempts
      */
-    public record AttemptsResponse(String eventId, List<AttemptResponse> attempts) {}
-
-    public record AttemptResponse(
-            Long id,
-            String channel,
-            String status,
-            Integer attemptNumber,
-            String messageId,
-            String errorMessage,
-            ZonedDateTime createdAt
-    ) {
-        private static AttemptResponse from(DeliveryAttemptEntity attempt) {
-            return new AttemptResponse(
-                    attempt.getId(),
-                    attempt.getChannel(),
-                    attempt.getStatus(),
-                    attempt.getAttemptNumber(),
-                    attempt.getMessageId(),
-                    attempt.getErrorMessage(),
-                    attempt.getCreatedAt()
-            );
-        }
-    }
+    public record AttemptsResponse(String eventId, String message) {}
 }

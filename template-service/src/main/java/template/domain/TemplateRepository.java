@@ -1,11 +1,19 @@
 package template.domain;
 
+import java.util.List;
 import java.util.Optional;
 
-/**
- * Domain port for loading notification templates.
- */
 public interface TemplateRepository {
 
-    Optional<Template> findActiveById(String templateId);
+    void save(Template template);
+
+    Optional<Template> findById(String templateId);
+
+    List<Template> findByEventType(String eventType);
+
+    List<Template> findActiveByEventType(String eventType);
+
+    void update(Template template);
+
+    void delete(String templateId);
 }
