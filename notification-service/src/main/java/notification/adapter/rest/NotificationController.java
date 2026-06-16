@@ -7,17 +7,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import notification.adapter.rest.dto.NotificationRequest;
+import notification.adapter.rest.dto.NotificationResponse;
+import notification.application.usecase.SendNotificationResult;
+import notification.application.usecase.SendNotificationUseCase;
+import notification.domain.event.EventType;
+import notification.domain.event.NotificationEvent;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import notification.adapter.rest.dto.NotificationRequest;
-import notification.adapter.rest.dto.NotificationResponse;
-import notification.application.usecase.SendNotificationUseCase;
-import notification.application.usecase.SendNotificationResult;
-import notification.domain.event.EventType;
-import notification.domain.event.NotificationEvent;
 
 import java.util.Map;
 
@@ -32,9 +31,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/notifications")
 @Tag(name = "Notifications", description = "Notification sending and status tracking")
+@Slf4j
 public class NotificationController {
-
-    private static final Logger log = LoggerFactory.getLogger(NotificationController.class);
 
     private final SendNotificationUseCase sendNotificationUseCase;
 
@@ -211,7 +209,7 @@ public class NotificationController {
             // For now, return a placeholder
             AttemptsResponse response = new AttemptsResponse(
                     eventId,
-                    "Query delivery-tracker service at http://localhost:8082/api/v1/delivery-attempts/events/" + eventId
+                    "Query delivery-tracker service at http://localhost:8003/api/v1/delivery-attempts/events/" + eventId
             );
 
             return ResponseEntity.ok(response);

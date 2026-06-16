@@ -1,7 +1,6 @@
 package notification.application.usecase;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import notification.application.service.DeduplicationService;
 import notification.application.service.TemplateResolver;
 import notification.domain.channel.Channel;
@@ -11,7 +10,6 @@ import notification.domain.event.NotificationEvent;
 import notification.domain.model.DeliveryStatus;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,9 +23,8 @@ import java.util.Map;
  *
  * This is an application-level orchestrator using domain ports.
  */
+@Slf4j
 public class SendNotificationUseCase {
-
-    private static final Logger log = LoggerFactory.getLogger(SendNotificationUseCase.class);
 
     private final DeduplicationService deduplicationService;
     private final TemplateResolver templateResolver;

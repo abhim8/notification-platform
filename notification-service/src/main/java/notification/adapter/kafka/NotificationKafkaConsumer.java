@@ -1,15 +1,14 @@
 package notification.adapter.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import notification.application.usecase.SendNotificationResult;
+import notification.application.usecase.SendNotificationUseCase;
+import notification.domain.event.NotificationEvent;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-import notification.application.usecase.SendNotificationUseCase;
-import notification.application.usecase.SendNotificationResult;
-import notification.domain.event.NotificationEvent;
 
 /**
  * Kafka consumer that listens to notification topics and dispatches events.
@@ -23,9 +22,9 @@ import notification.domain.event.NotificationEvent;
  * Consumer group: notif-svc (single group for all topics)
  */
 @Component
+@Slf4j
 public class NotificationKafkaConsumer {
 
-    private static final Logger log = LoggerFactory.getLogger(NotificationKafkaConsumer.class);
 
     private final SendNotificationUseCase sendNotificationUseCase;
     private final NotificationKafkaProducer kafkaProducer;

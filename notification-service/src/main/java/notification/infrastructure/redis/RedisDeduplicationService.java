@@ -1,11 +1,11 @@
 package notification.infrastructure.redis;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import notification.application.service.DeduplicationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import notification.application.service.DeduplicationService;
 
 import java.util.concurrent.TimeUnit;
 
@@ -16,19 +16,16 @@ import java.util.concurrent.TimeUnit;
  * Event IDs are keys, and the presence of a key indicates the event has been processed.
  */
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class RedisDeduplicationService implements DeduplicationService {
 
-    private static final Logger log = LoggerFactory.getLogger(RedisDeduplicationService.class);
     private static final String DEDUP_KEY_PREFIX = "dedup:event:";
 
     @Value("${idempotency.ttl-hours:24}")
     private long ttlHours;
 
     private final RedisTemplate<String, String> redisTemplate;
-
-    public RedisDeduplicationService(RedisTemplate<String, String> redisTemplate) {
-        this.redisTemplate = redisTemplate;
-    }
 
     @Override
     public boolean isDuplicate(String eventId) {

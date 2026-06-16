@@ -1,11 +1,10 @@
 package notification.infrastructure.shedlock;
 
+import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import notification.application.usecase.RetryUseCase;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import notification.application.usecase.RetryUseCase;
 
 /**
  * Scheduled task for retrying failed notifications.
@@ -15,9 +14,8 @@ import notification.application.usecase.RetryUseCase;
  * across a distributed cluster.
  */
 @Component
+@Slf4j
 public class RetryScheduler {
-
-    private static final Logger log = LoggerFactory.getLogger(RetryScheduler.class);
 
     private final RetryUseCase retryUseCase;
 

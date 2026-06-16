@@ -1,11 +1,19 @@
 spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
   application:
     name: delivery-tracker
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost:5432}/notification_db
-    username: ${DB_USER:notif_user}
-    password: ${DB_PASSWORD:notif_password}
+    url: ${DB_HOST:jdbc:postgresql://localhost:5432/notification?currentSchema=notification_schema}
+    username: ${DB_USER:abhilash}
+    password: ${DB_PASSWORD:}
     driver-class-name: org.postgresql.Driver
+  liquibase:
+    enabled: true
+    default-schema: notification_schema
+    change-log: classpath:db-changelog-master.yaml
   jpa:
     hibernate:
       ddl-auto: validate
@@ -17,7 +25,7 @@ spring:
       write-dates-as-timestamps: false
 
 server:
-  port: ${DELIVERY_TRACKER_PORT:8082}
+  port: ${DELIVERY_TRACKER_PORT:8003}
 
 logging:
   level:
@@ -25,13 +33,16 @@ logging:
     delivery: DEBUG
 
 management:
+  health:
+    redis:
+      enabled: false
   endpoints:
     web:
       exposure:
         include: health,metrics,info
   endpoint:
     health:
-      show-details: when-authorized
+      show-details: always
 
 springdoc:
   api-docs:

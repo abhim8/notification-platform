@@ -1,14 +1,13 @@
 package notification.adapter.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import notification.domain.event.NotificationEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
-import notification.domain.event.NotificationEvent;
 
 /**
  * Kafka producer for publishing notifications to retry and DLQ topics.
@@ -20,9 +19,8 @@ import notification.domain.event.NotificationEvent;
  * Partition key: userId (ensures ordering per user)
  */
 @Component
+@Slf4j
 public class NotificationKafkaProducer {
-
-    private static final Logger log = LoggerFactory.getLogger(NotificationKafkaProducer.class);
 
     private static final String RETRY_TOPIC = "notification.retry";
     private static final String DLQ_TOPIC = "notification.dlq";

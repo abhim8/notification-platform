@@ -15,8 +15,8 @@ This is a production-grade, event-driven notification platform built with:
 | Service | Port | Purpose |
 |---------|------|---------|
 | **notification-service** | 8001 | Core service: Kafka consumer, channel dispatcher, retry logic |
-| **template-service** | 8081 | Template management and rendering |
-| **delivery-tracker** | 8082 | Delivery attempt tracking and history |
+| **template-service** | 8002 | Template management and rendering |
+| **delivery-tracker** | 8003 | Delivery attempt tracking and history |
 
 ### Tech Stack
 
@@ -108,13 +108,13 @@ cd /Users/abhilash/IdeaProjects/notification-platform
 mvn spring-boot:run -pl notification-service
 ```
 
-**Terminal 2 - Template Service (port 8081):**
+**Terminal 2 - Template Service (port 8002):**
 ```bash
 cd /Users/abhilash/IdeaProjects/notification-platform
 mvn spring-boot:run -pl template-service
 ```
 
-**Terminal 3 - Delivery Tracker (port 8082):**
+**Terminal 3 - Delivery Tracker (port 8003):**
 ```bash
 cd /Users/abhilash/IdeaProjects/notification-platform
 mvn spring-boot:run -pl delivery-tracker
@@ -127,8 +127,8 @@ mvn spring-boot:run -pl delivery-tracker
 ### Swagger Documentation
 
 - **notification-service**: http://localhost:8001/swagger-ui.html
-- **template-service**: http://localhost:8081/swagger-ui.html
-- **delivery-tracker**: http://localhost:8082/swagger-ui.html
+- **template-service**: http://localhost:8002/swagger-ui.html
+- **delivery-tracker**: http://localhost:8003/swagger-ui.html
 
 ### Example 1: Send a Notification
 
@@ -176,23 +176,23 @@ curl -X POST http://localhost:8001/api/v1/notifications \
 
 ```bash
 # Query delivery attempts for an event
-curl http://localhost:8082/api/v1/delivery-attempts/events/evt_001
+curl http://localhost:8003/api/v1/delivery-attempts/events/evt_001
 
 # Query by channel
-curl http://localhost:8082/api/v1/delivery-attempts/events/evt_001/channels/email
+curl http://localhost:8003/api/v1/delivery-attempts/events/evt_001/channels/email
 
 # Query user's recent attempts
-curl http://localhost:8082/api/v1/delivery-attempts/users/usr_123
+curl http://localhost:8003/api/v1/delivery-attempts/users/usr_123
 ```
 
 ### Example 3: Check Template
 
 ```bash
 # Get a template
-curl http://localhost:8081/api/v1/templates/order-confirm
+curl http://localhost:8002/api/v1/templates/order-confirm
 
 # Render a template with data
-curl -X POST http://localhost:8081/api/v1/templates/order-confirm/render \
+curl -X POST http://localhost:8002/api/v1/templates/order-confirm/render \
   -H "Content-Type: application/json" \
   -d '{
     "orderId": "ord_789",
@@ -308,11 +308,11 @@ export REDIS_HOST=localhost
 export RETRY_SCHEDULER_INTERVAL_MS=30000
 
 # Template Service
-export TEMPLATE_SERVICE_PORT=8081
+export TEMPLATE_SERVICE_PORT=8002
 export DB_HOST=localhost:5432
 
 # Delivery Tracker
-export DELIVERY_TRACKER_PORT=8082
+export DELIVERY_TRACKER_PORT=8003
 export DB_HOST=localhost:5432
 
 # Channel Configuration

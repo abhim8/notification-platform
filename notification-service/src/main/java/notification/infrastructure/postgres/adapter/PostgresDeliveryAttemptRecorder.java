@@ -1,14 +1,13 @@
 package notification.infrastructure.postgres.adapter;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import notification.application.usecase.SendNotificationUseCase;
 import notification.domain.channel.Channel;
 import notification.domain.model.DeliveryStatus;
 import notification.infrastructure.postgres.entity.DeliveryAttemptEntity;
 import notification.infrastructure.postgres.repository.DeliveryAttemptRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 
@@ -18,9 +17,8 @@ import java.time.ZonedDateTime;
  */
 @Service
 @Transactional
+@Slf4j
 public class PostgresDeliveryAttemptRecorder implements SendNotificationUseCase.DeliveryAttemptRecorder {
-
-    private static final Logger log = LoggerFactory.getLogger(PostgresDeliveryAttemptRecorder.class);
 
     private final DeliveryAttemptRepository repository;
 

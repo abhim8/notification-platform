@@ -19,20 +19,28 @@ spring:
       enable-auto-commit: false
       group-id: notif-svc
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost:5432}/notification_db
-    username: ${DB_USER:notif_user}
-    password: ${DB_PASSWORD:notif_password}
+    url: ${DB_HOST:jdbc:postgresql://localhost:5432/notification?currentSchema=notification_schema}
+    username: ${DB_USER:abhilash}
+    password: ${DB_PASSWORD:}
     driver-class-name: org.postgresql.Driver
+  liquibase:
+    enabled: true
+    default-schema: notification_schema
+    change-log: classpath:db-changelog-master.yaml
   jpa:
     hibernate:
       ddl-auto: validate
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: notification_schema
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2s
+      connect-timeout: 2s
   jackson:
     serialization:
       write-dates-as-timestamps: false
@@ -55,13 +63,16 @@ logging:
     org.springframework.data: INFO
 
 management:
+  health:
+    redis:
+      enabled: true
   endpoints:
     web:
       exposure:
         include: health,metrics,info
   endpoint:
     health:
-      show-details: when-authorized
+      show-details: always
 
 sendgrid:
   api-key: ${SENDGRID_API_KEY:mock-key}

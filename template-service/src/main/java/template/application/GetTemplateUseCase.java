@@ -1,7 +1,6 @@
 package template.application;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import template.adapter.postgres.entity.TemplateEntity;
 import template.adapter.postgres.repository.TemplateEntityRepository;
@@ -16,9 +15,8 @@ import java.util.Optional;
  * Loads templates from the database and renders them with the provided payload.
  */
 @Service
+@Slf4j
 public class GetTemplateUseCase {
-
-    private static final Logger log = LoggerFactory.getLogger(GetTemplateUseCase.class);
 
     private final TemplateEntityRepository repository;
 

@@ -27,10 +27,10 @@ public class SwaggerConfig {
                                 .email("support@notification-platform.com")))
                 .servers(List.of(
                         new Server()
-                                .url("http://localhost:8082")
+                                .url("http://localhost:8003")
                                 .description("Local development server"),
                         new Server()
-                                .url("http://delivery-tracker:8082")
+                                .url("http://delivery-tracker:8003")
                                 .description("Docker container")
                 ));
     }

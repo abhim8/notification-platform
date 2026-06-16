@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+            http://www.liquibase.org/xml/ns/dbchangelog
+            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="v2-seed-templates" author="abhilash">
+
+        <insert tableName="templates">
+            <column name="id" value="order-confirm"/>
+            <column name="event_type" value="ORDER_PLACED"/>
+            <column name="name" value="Order Confirmation"/>
+            <column name="subject" value="Order Confirmed"/>
+            <column name="body"
+                    value="Your order has been confirmed. Order ID: {{orderId}}, Amount: ${{amount}}"/>
+            <column name="version" valueNumeric="1"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_at" valueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="templates">
+            <column name="id" value="order-shipped"/>
+            <column name="event_type" value="ORDER_SHIPPED"/>
+            <column name="name" value="Order Shipped"/>
+            <column name="subject" value="Order Shipped"/>
+            <column name="body"
+                    value="Your order has been shipped. Tracking: {{trackingNumber}}"/>
+            <column name="version" valueNumeric="1"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_at" valueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="templates">
+            <column name="id" value="password-reset"/>
+            <column name="event_type" value="PASSWORD_RESET"/>
+            <column name="name" value="Password Reset"/>
+            <column name="subject" value="Reset Your Password"/>
+            <column name="body"
+                    value="Password reset link: {{resetLink}}"/>
+            <column name="version" valueNumeric="1"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_at" valueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="templates">
+            <column name="id" value="account-created"/>
+            <column name="event_type" value="ACCOUNT_CREATED"/>
+            <column name="name" value="Account Created"/>
+            <column name="subject" value="Welcome"/>
+            <column name="body"
+                    value="Welcome {{userName}}! Your account is now active."/>
+            <column name="version" valueNumeric="1"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_at" valueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="templates">
+            <column name="id" value="payment-failed"/>
+            <column name="event_type" value="PAYMENT_FAILED"/>
+            <column name="name" value="Payment Failed"/>
+            <column name="subject" value="Payment Failed"/>
+            <column name="body"
+                    value="Payment failed for order {{orderId}}. Please retry at {{retryUrl}}"/>
+            <column name="version" valueNumeric="1"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_at" valueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="templates">
+            <column name="id" value="user-invited"/>
+            <column name="event_type" value="USER_INVITED"/>
+            <column name="name" value="User Invited"/>
+            <column name="subject" value="You've Been Invited"/>
+            <column name="body"
+                    value="{{inviterName}} invited you to join. Link: {{joinLink}}"/>
+            <column name="version" valueNumeric="1"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_at" valueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="templates">
+            <column name="id" value="promotion-alert"/>
+            <column name="event_type" value="PROMOTION_ALERT"/>
+            <column name="name" value="Promotion Alert"/>
+            <column name="subject" value="Special Offer"/>
+            <column name="body"
+                    value="Special offer: {{promotionTitle}} - {{promotionDescription}}"/>
+            <column name="version" valueNumeric="1"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_at" valueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="templates">
+            <column name="id" value="fraud-alert"/>
+            <column name="event_type" value="FRAUD_ALERT"/>
+            <column name="name" value="Fraud Alert"/>
+            <column name="subject" value="Security Alert"/>
+            <column name="body"
+                    value="ALERT: Suspicious activity detected on your account. Please verify at {{verifyUrl}}"/>
+            <column name="version" valueNumeric="1"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_at" valueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="templates">
+            <column name="id" value="order-delivered"/>
+            <column name="event_type" value="ORDER_DELIVERED"/>
+            <column name="name" value="Order Delivered"/>
+            <column name="subject" value="Order Delivered"/>
+            <column name="body"
+                    value="Your order has been delivered on {{deliveryDate}}"/>
+            <column name="version" valueNumeric="1"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_at" valueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+
+        <insert tableName="templates">
+            <column name="id" value="system-alert"/>
+            <column name="event_type" value="SYSTEM_ALERT"/>
+            <column name="name" value="System Alert"/>
+            <column name="subject" value="System Notification"/>
+            <column name="body"
+                    value="System notification: {{alertMessage}}"/>
+            <column name="version" valueNumeric="1"/>
+            <column name="active" valueBoolean="true"/>
+            <column name="created_at" valueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated_at" valueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+
+    </changeSet>
+
+</databaseChangeLog>

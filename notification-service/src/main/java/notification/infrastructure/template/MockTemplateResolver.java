@@ -1,10 +1,9 @@
 package notification.infrastructure.template;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import notification.application.service.TemplateResolver;
+import lombok.extern.slf4j.Slf4j;
 import notification.application.service.TemplateResolutionException;
+import notification.application.service.TemplateResolver;
+import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
@@ -15,9 +14,8 @@ import java.util.Map;
  * For now, we mock template resolution with simple string formatting.
  */
 @Service
+@Slf4j
 public class MockTemplateResolver implements TemplateResolver {
-
-    private static final Logger log = LoggerFactory.getLogger(MockTemplateResolver.class);
 
     @Override
     public String resolveTemplate(String templateId, Map<String, Object> payload) {

@@ -1,15 +1,14 @@
 package notification.adapter.channels.webhook;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import lombok.extern.slf4j.Slf4j;
 import notification.domain.channel.Channel;
 import notification.domain.channel.ChannelDispatcher;
 import notification.domain.channel.DispatchResult;
 import notification.domain.event.NotificationEvent;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Webhook channel adapter for outbound HTTP notifications.
@@ -18,9 +17,8 @@ import notification.domain.event.NotificationEvent;
  * Includes timeout handling and basic error recovery.
  */
 @Component
+@Slf4j
 public class WebhookAdapter implements ChannelDispatcher {
-
-    private static final Logger log = LoggerFactory.getLogger(WebhookAdapter.class);
 
     @Value("${webhook.timeout-ms:5000}")
     private int timeoutMs;

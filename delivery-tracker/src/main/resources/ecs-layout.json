@@ -1,0 +1,46 @@
+{
+  "level": {
+    "$resolver": "level",
+    "field": "name"
+  },
+  "class": {
+    "$resolver": "source",
+    "field": "className"
+  },
+  "method": {
+    "$resolver": "source",
+    "field": "methodName"
+  },
+  "file": {
+    "$resolver": "source",
+    "field": "fileName"
+  },
+  "line": {
+    "$resolver": "source",
+    "field": "lineNumber"
+  },
+  "message": {
+    "$resolver": "message",
+    "stringified": true
+  },
+  "errorType": {
+    "$resolver": "marker",
+    "field": "name"
+  },
+  "labels": {
+    "$resolver": "mdc",
+    "flatten": true,
+    "stringified": true
+  },
+  "error_message": {
+    "$resolver": "exception",
+    "field": "message"
+  },
+  "error_stack_trace": {
+    "$resolver": "exception",
+    "field": "stackTrace",
+    "stackTrace": {
+      "stringified": true
+    }
+  }
+}

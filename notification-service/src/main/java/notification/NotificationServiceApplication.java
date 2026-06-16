@@ -17,7 +17,7 @@ import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock;
  */
 @SpringBootApplication
 @EnableScheduling
-@EnableSchedulerLock(defaultLockAtMostFor = "10m")
+@EnableSchedulerLock(defaultLockAtMostFor = "PT10M")
 public class NotificationServiceApplication {
 
     public static void main(String[] args) {

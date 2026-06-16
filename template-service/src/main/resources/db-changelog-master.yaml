@@ -1,0 +1,5 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/v1__create_templates.xml
+  - include:
+      file: db/changelog/v2__insert_templates.xml

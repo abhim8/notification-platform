@@ -1,7 +1,6 @@
 package notification.application.usecase;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import notification.domain.channel.Channel;
 import notification.domain.model.DeliveryStatus;
 import notification.domain.model.RetryPolicy;
@@ -14,9 +13,8 @@ import notification.domain.model.RetryPolicy;
  *
  * This is executed by a scheduled task (ShedLock protected).
  */
+@Slf4j
 public class RetryUseCase {
-
-    private static final Logger log = LoggerFactory.getLogger(RetryUseCase.class);
 
     private final RetryPolicy retryPolicy;
     private final SendNotificationUseCase sendNotificationUseCase;

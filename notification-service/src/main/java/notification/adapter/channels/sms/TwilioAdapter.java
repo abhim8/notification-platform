@@ -1,13 +1,12 @@
 package notification.adapter.channels.sms;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 import notification.domain.channel.Channel;
 import notification.domain.channel.ChannelDispatcher;
 import notification.domain.channel.DispatchResult;
 import notification.domain.event.NotificationEvent;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 /**
  * SMS channel adapter using Twilio.
@@ -16,9 +15,8 @@ import notification.domain.event.NotificationEvent;
  * All sends are logged as mock operations for testing/demonstration.
  */
 @Component
+@Slf4j
 public class TwilioAdapter implements ChannelDispatcher {
-
-    private static final Logger log = LoggerFactory.getLogger(TwilioAdapter.class);
 
     @Value("${twilio.from-number:+1234567890}")
     private String fromNumber;
