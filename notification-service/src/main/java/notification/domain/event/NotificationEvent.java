@@ -1,7 +1,8 @@
 package notification.domain.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import notification.domain.channel.Channel;
+import com.notification.common.domain.Channel;
+import com.notification.common.domain.EventType;
 import java.util.List;
 import java.util.Map;
 

@@ -1,16 +1,18 @@
 package delivery.adapter.rest;
 
+import com.notification.common.domain.Channel;
+import com.notification.common.exception.NotFoundException;
 import delivery.adapter.postgres.entity.DeliveryAttemptEntity;
 import delivery.adapter.rest.dto.CreateDeliveryAttemptRequest;
 import delivery.adapter.rest.dto.DeliveryAttemptResponse;
 import delivery.application.CreateAttemptCommand;
 import delivery.application.DeliveryAttemptUseCase;
-import delivery.domain.channel.Channel;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,9 +21,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * REST controller for delivery attempt tracking.
- */
 @RestController
 @RequestMapping("/api/v1/delivery-attempts")
 @Tag(name = "Delivery Attempts", description = "Delivery attempt tracking and history")
@@ -31,9 +30,6 @@ public class DeliveryAttemptController {
 
     private final DeliveryAttemptUseCase useCase;
 
-    /**
-     * Get all delivery attempts for an event
-     */
     @GetMapping("/events/{eventId}")
     @Operation(summary = "Get attempts by event ID", description = "Retrieves all delivery attempts for a specific event")
     @ApiResponses(value = {
@@ -44,30 +40,21 @@ public class DeliveryAttemptController {
             @Parameter(description = "Event ID", required = true)
             @PathVariable String eventId) {
 
-        try {
-            log.debug("GET /api/v1/delivery-attempts/events/{}", eventId);
+        log.debug("GET /api/v1/delivery-attempts/events/{}", eventId);
 
-            List<DeliveryAttemptEntity> attempts = useCase.getAttemptsByEvent(eventId);
+        List<DeliveryAttemptEntity> attempts = useCase.getAttemptsByEvent(eventId);
 
-            if (attempts.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            List<DeliveryAttemptResponse> responses = attempts.stream()
-                    .map(this::toResponse)
-                    .toList();
-
-            return ResponseEntity.ok(responses);
-
-        } catch (Exception e) {
-            log.error("Error retrieving attempts for event: {}", eventId, e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        if (attempts.isEmpty()) {
+            throw new NotFoundException("No delivery attempts found for event: " + eventId);
         }
+
+        List<DeliveryAttemptResponse> responses = attempts.stream()
+                .map(this::toResponse)
+                .toList();
+
+        return ResponseEntity.ok(responses);
     }
 
-    /**
-     * Get delivery attempts for a specific event and channel
-     */
     @GetMapping("/events/{eventId}/channels/{channel}")
     @Operation(summary = "Get attempts by event and channel", description = "Retrieves all delivery attempts for a specific event and channel")
     @ApiResponses(value = {
@@ -80,34 +67,22 @@ public class DeliveryAttemptController {
             @Parameter(description = "Channel (email, sms, push, webhook)", required = true)
             @PathVariable String channel) {
 
-        try {
-            log.debug("GET /api/v1/delivery-attempts/events/{}/channels/{}", eventId, channel);
+        log.debug("GET /api/v1/delivery-attempts/events/{}/channels/{}", eventId, channel);
 
-            Channel channelEnum = Channel.valueOf(channel.toUpperCase());
-            List<DeliveryAttemptEntity> attempts = useCase.getAttemptsByEventAndChannel(eventId, channelEnum);
+        Channel channelEnum = Channel.fromString(channel);
+        List<DeliveryAttemptEntity> attempts = useCase.getAttemptsByEventAndChannel(eventId, channelEnum);
 
-            if (attempts.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            List<DeliveryAttemptResponse> responses = attempts.stream()
-                    .map(this::toResponse)
-                    .toList();
-
-            return ResponseEntity.ok(responses);
-
-        } catch (IllegalArgumentException e) {
-            log.warn("Invalid channel: {}", channel);
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            log.error("Error retrieving attempts for event: {} and channel: {}", eventId, channel, e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        if (attempts.isEmpty()) {
+            throw new NotFoundException("No delivery attempts found for event: " + eventId + " and channel: " + channel);
         }
+
+        List<DeliveryAttemptResponse> responses = attempts.stream()
+                .map(this::toResponse)
+                .toList();
+
+        return ResponseEntity.ok(responses);
     }
 
-    /**
-     * Get a single delivery attempt by ID
-     */
     @GetMapping("/{attemptId}")
     @Operation(summary = "Get attempt by ID", description = "Retrieves a single delivery attempt by its ID")
     @ApiResponses(value = {
@@ -118,23 +93,14 @@ public class DeliveryAttemptController {
             @Parameter(description = "Attempt ID", required = true)
             @PathVariable Long attemptId) {
 
-        try {
-            log.debug("GET /api/v1/delivery-attempts/{}", attemptId);
+        log.debug("GET /api/v1/delivery-attempts/{}", attemptId);
 
-            return useCase.getAttemptById(attemptId)
-                    .map(this::toResponse)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
-
-        } catch (Exception e) {
-            log.error("Error retrieving attempt: {}", attemptId, e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        return useCase.getAttemptById(attemptId)
+                .map(this::toResponse)
+                .map(ResponseEntity::ok)
+                .orElseThrow(() -> new NotFoundException("Delivery attempt not found: " + attemptId));
     }
 
-    /**
-     * Get all attempts for a user ID
-     */
     @GetMapping("/users/{userId}")
     @Operation(summary = "Get attempts by user ID", description = "Retrieves all delivery attempts for a specific user")
     @ApiResponses(value = {
@@ -145,30 +111,21 @@ public class DeliveryAttemptController {
             @Parameter(description = "User ID", required = true)
             @PathVariable String userId) {
 
-        try {
-            log.debug("GET /api/v1/delivery-attempts/users/{}/", userId);
+        log.debug("GET /api/v1/delivery-attempts/users/{}/", userId);
 
-            List<DeliveryAttemptEntity> attempts = useCase.getAttemptsByUser(userId);
+        List<DeliveryAttemptEntity> attempts = useCase.getAttemptsByUser(userId);
 
-            if (attempts.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            List<DeliveryAttemptResponse> responses = attempts.stream()
-                    .map(this::toResponse)
-                    .toList();
-
-            return ResponseEntity.ok(responses);
-
-        } catch (Exception e) {
-            log.error("Error retrieving attempts for user: {}", userId, e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        if (attempts.isEmpty()) {
+            throw new NotFoundException("No delivery attempts found for user: " + userId);
         }
+
+        List<DeliveryAttemptResponse> responses = attempts.stream()
+                .map(this::toResponse)
+                .toList();
+
+        return ResponseEntity.ok(responses);
     }
 
-    /**
-     * Record a delivery attempt
-     */
     @PostMapping
     @Operation(summary = "Record delivery attempt", description = "Persists a delivery attempt for tracking and retry")
     @ApiResponses(value = {
@@ -176,34 +133,21 @@ public class DeliveryAttemptController {
             @ApiResponse(responseCode = "400", description = "Invalid request")
     })
     public ResponseEntity<DeliveryAttemptResponse> createAttempt(
-            @Parameter(description = "Delivery attempt data", required = true)
-            @RequestBody CreateDeliveryAttemptRequest request) {
+            @Valid @RequestBody CreateDeliveryAttemptRequest request) {
 
-        try {
-            log.debug("POST /api/v1/delivery-attempts");
+        log.debug("POST /api/v1/delivery-attempts");
 
-            CreateAttemptCommand command = new CreateAttemptCommand(
-                    request.eventId(), request.userId(), request.eventType(),
-                    request.channel(), request.status(), request.attemptNumber(),
-                    request.messageId(), request.errorMessage()
-            );
+        CreateAttemptCommand command = new CreateAttemptCommand(
+                request.eventId(), request.userId(), request.eventType(),
+                request.channel(), request.status(), request.attemptNumber(),
+                request.messageId(), request.errorMessage()
+        );
 
-            DeliveryAttemptEntity saved = useCase.createAttempt(command);
+        DeliveryAttemptEntity saved = useCase.createAttempt(command);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(saved));
-
-        } catch (IllegalArgumentException e) {
-            log.warn("Invalid enum value in request: {}", e.getMessage());
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            log.error("Error saving delivery attempt for event: {}", request.eventId(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(saved));
     }
 
-    /**
-     * Get failed delivery attempts for retry processing
-     */
     @GetMapping("/failed")
     @Operation(summary = "Get failed attempts", description = "Retrieves failed delivery attempts for retry processing")
     @ApiResponses(value = {
@@ -215,26 +159,17 @@ public class DeliveryAttemptController {
             @Parameter(description = "Maximum number of attempts to return")
             @RequestParam(defaultValue = "100") int limit) {
 
-        try {
-            log.debug("GET /api/v1/delivery-attempts/failed");
+        log.debug("GET /api/v1/delivery-attempts/failed");
 
-            List<DeliveryAttemptEntity> attempts = useCase.getFailedAttempts(since, limit);
+        List<DeliveryAttemptEntity> attempts = useCase.getFailedAttempts(since, limit);
 
-            List<DeliveryAttemptResponse> responses = attempts.stream()
-                    .map(this::toResponse)
-                    .toList();
+        List<DeliveryAttemptResponse> responses = attempts.stream()
+                .map(this::toResponse)
+                .toList();
 
-            return ResponseEntity.ok(responses);
-
-        } catch (Exception e) {
-            log.error("Error retrieving failed attempts", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        return ResponseEntity.ok(responses);
     }
 
-    /**
-     * Convert entity to DTO
-     */
     private DeliveryAttemptResponse toResponse(DeliveryAttemptEntity entity) {
         return new DeliveryAttemptResponse(
                 entity.getId(),

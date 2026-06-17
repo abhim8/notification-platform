@@ -1,5 +1,6 @@
 package template.adapter.rest;
 
+import com.notification.common.exception.NotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -7,20 +8,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import template.adapter.rest.dto.TemplateResponse;
 import template.application.TemplateUseCase;
-import template.application.TemplateNotFoundException;
 import template.domain.Template;
 
 import java.util.List;
 import java.util.Map;
 
-/**
- * REST controller for template operations.
- */
 @RestController
 @RequestMapping("/api/v1/templates")
 @Tag(name = "Templates", description = "Notification template management")
@@ -29,9 +25,6 @@ import java.util.Map;
 public class TemplateController {
     private final TemplateUseCase templateUseCase;
 
-    /**
-     * Get all templates
-     */
     @GetMapping
     @Operation(summary = "Get all templates", description = "Retrieves all templates in the database")
     @ApiResponses(value = {
@@ -52,9 +45,6 @@ public class TemplateController {
         return ResponseEntity.ok(responses);
     }
 
-    /**
-     * Get a template by ID
-     */
     @GetMapping("/{templateId}")
     @Operation(summary = "Get template by ID", description = "Retrieves a template without rendering")
     @ApiResponses(value = {
@@ -65,37 +55,25 @@ public class TemplateController {
             @Parameter(description = "Template ID", required = true)
             @PathVariable String templateId) {
 
-        try {
-            log.debug("GET /api/v1/templates/{} ", templateId);
+        log.debug("GET /api/v1/templates/{} ", templateId);
 
-            Template template = templateUseCase.getTemplate(templateId);
+        Template template = templateUseCase.getTemplate(templateId);
 
-            TemplateResponse response = new TemplateResponse(
-                    template.id(),
-                    template.eventType(),
-                    template.name(),
-                    template.subject(),
-                    template.body(),
-                    template.version(),
-                    template.active(),
-                    template.createdAt(),
-                    template.updatedAt()
-            );
+        TemplateResponse response = new TemplateResponse(
+                template.id(),
+                template.eventType(),
+                template.name(),
+                template.subject(),
+                template.body(),
+                template.version(),
+                template.active(),
+                template.createdAt(),
+                template.updatedAt()
+        );
 
-            return ResponseEntity.ok(response);
-
-        } catch (TemplateNotFoundException e) {
-            log.warn("Template not found: {}", templateId);
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            log.error("Error retrieving template: {}", templateId, e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Get and render a template with payload
-     */
     @PostMapping("/{templateId}/render")
     @Operation(summary = "Render template", description = "Retrieves and renders a template with the provided payload")
     @ApiResponses(value = {
@@ -109,30 +87,18 @@ public class TemplateController {
             @Parameter(description = "Payload for template rendering", required = true)
             @RequestBody Map<String, Object> payload) {
 
-        try {
-            log.debug("POST /api/v1/templates/{}/render", templateId);
+        log.debug("POST /api/v1/templates/{}/render", templateId);
 
-            if (payload == null) {
-                payload = Map.of();
-            }
-
-            String rendered = templateUseCase.getAndRenderTemplate(templateId, payload);
-
-            RenderResponse response = new RenderResponse(templateId, rendered);
-            return ResponseEntity.ok(response);
-
-        } catch (TemplateNotFoundException e) {
-            log.warn("Template not found : {}", templateId);
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            log.error("Error rendering template: {}", templateId, e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        if (payload == null) {
+            payload = Map.of();
         }
+
+        String rendered = templateUseCase.getAndRenderTemplate(templateId, payload);
+
+        RenderResponse response = new RenderResponse(templateId, rendered);
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Check if a template exists
-     */
     @RequestMapping(value = "/{templateId}", method = org.springframework.web.bind.annotation.RequestMethod.HEAD)
     @Operation(summary = "Check template exists", description = "Returns 200 if template exists, 404 otherwise")
     @ApiResponses(value = {
@@ -145,15 +111,9 @@ public class TemplateController {
         if (templateUseCase.templateExists(templateId)) {
             return ResponseEntity.ok().build();
         } else {
-            log.warn("Template not-found: {}", templateId);
-            return ResponseEntity.notFound().build();
+            throw new NotFoundException("Template not found: " + templateId);
         }
     }
 
-    /**
-     * Response DTO for rendered template
-     */
     public record RenderResponse(String templateId, String content) {}
 }
-
-

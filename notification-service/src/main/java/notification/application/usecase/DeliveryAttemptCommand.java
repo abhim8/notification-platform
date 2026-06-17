@@ -1,8 +1,8 @@
 package notification.application.usecase;
 
-import notification.domain.channel.Channel;
-import notification.domain.event.EventType;
-import notification.domain.model.DeliveryStatus;
+import com.notification.common.domain.Channel;
+import com.notification.common.domain.EventType;
+import com.notification.common.domain.DeliveryStatus;
 
 public record DeliveryAttemptCommand(
     String eventId,

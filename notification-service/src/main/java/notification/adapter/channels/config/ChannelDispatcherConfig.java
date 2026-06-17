@@ -7,7 +7,7 @@ import notification.adapter.channels.email.SendGridAdapter;
 import notification.adapter.channels.push.FcmAdapter;
 import notification.adapter.channels.sms.TwilioAdapter;
 import notification.adapter.channels.webhook.WebhookAdapter;
-import notification.domain.channel.Channel;
+import com.notification.common.domain.Channel;
 import notification.domain.channel.ChannelDispatcher;
 
 import java.util.HashMap;

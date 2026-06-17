@@ -1,5 +1,6 @@
 package notification.adapter.rest;
 
+import com.notification.common.domain.DeliveryStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -7,27 +8,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import notification.adapter.rest.dto.NotificationRequest;
 import notification.adapter.rest.dto.NotificationResponse;
 import notification.application.usecase.SendNotificationResult;
 import notification.application.usecase.SendNotificationUseCase;
 import notification.domain.event.NotificationEvent;
-import notification.domain.model.DeliveryStatus;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
-/**
- * REST controller for sending notifications via the notification-service.
- *
- * Exposes endpoints for:
- * 1. Manually sending notifications (bypassing Kafka)
- * 2. Querying delivery status of sent notifications
- * 3. Getting delivery attempts per channel
- */
 @RestController
 @RequestMapping("/api/v1/notifications")
 @Tag(name = "Notifications", description = "Notification sending and status tracking")
@@ -40,12 +32,6 @@ public class NotificationController {
         this.sendNotificationUseCase = sendNotificationUseCase;
     }
 
-    /**
-     * Manually send a notification (synchronous)
-     *
-     * This endpoint bypasses Kafka and sends notifications directly.
-     * Useful for testing or synchronous notification needs.
-     */
     @PostMapping
     @Operation(
             summary = "Send a notification",
@@ -67,61 +53,33 @@ public class NotificationController {
             )
     })
     public ResponseEntity<NotificationResponse> sendNotification(
-            @RequestBody NotificationRequest request) {
+            @Valid @RequestBody NotificationRequest request) {
 
-        try {
-            log.info("[REST] Sending notification: eventId={}, eventType={}, userId={}, channels={}",
-                    request.eventId(), request.eventType(), request.userId(), request.channels());
+        log.info("[REST] Sending notification: eventId={}, eventType={}, userId={}, channels={}",
+                request.eventId(), request.eventType(), request.userId(), request.channels());
 
-            // Validate request
-            if (request.eventId() == null || request.eventId().isBlank()) {
-                return ResponseEntity.badRequest().build();
-            }
-            if (request.userId() == null || request.userId().isBlank()) {
-                return ResponseEntity.badRequest().build();
-            }
-            if (request.channels() == null || request.channels().isEmpty()) {
-                return ResponseEntity.badRequest().build();
-            }
-            if (request.templateId() == null || request.templateId().isBlank()) {
-                return ResponseEntity.badRequest().build();
-            }
+        NotificationEvent event = NotificationEvent.create(
+                request.eventId(),
+                request.eventType(),
+                request.userId(),
+                request.channels(),
+                request.templateId(),
+                request.payload() != null ? request.payload() : Map.of()
+        );
 
-            // Create notification event
-            NotificationEvent event = NotificationEvent.create(
-                    request.eventId(),
-                    request.eventType(),
-                    request.userId(),
-                    request.channels(),
-                    request.templateId(),
-                    request.payload() != null ? request.payload() : Map.of()
-            );
+        SendNotificationResult result = sendNotificationUseCase.execute(event);
 
-            // Send notification
-            SendNotificationResult result = sendNotificationUseCase.execute(event);
+        NotificationResponse response = new NotificationResponse(
+                result.eventId(),
+                result.success(),
+                result.status(),
+                result.message(),
+                result.channelResults()
+        );
 
-            // Build response
-            NotificationResponse response = new NotificationResponse(
-                    result.eventId(),
-                    result.success(),
-                    result.status(),
-                    result.message(),
-                    result.channelResults()
-            );
-
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            log.error("[ERROR] Failed to send notification", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Get delivery status for a notification
-     *
-     * Returns the overall delivery status and per-channel results.
-     */
     @GetMapping("/{eventId}")
     @Operation(
             summary = "Get notification delivery status",
@@ -146,30 +104,17 @@ public class NotificationController {
             @Parameter(description = "Event ID", required = true)
             @PathVariable String eventId) {
 
-        try {
-            log.debug("[REST] Getting delivery status: eventId={}", eventId);
+        log.debug("[REST] Getting delivery status: eventId={}", eventId);
 
-            // In a real system, this would query a delivery status repository
-            // For now, we'll return a placeholder indicating the event was processed
-            DeliveryStatusResponse response = new DeliveryStatusResponse(
-                    eventId,
-                    null,
-                    "Event has been processed. Query delivery-tracker service for detailed status."
-            );
+        DeliveryStatusResponse response = new DeliveryStatusResponse(
+                eventId,
+                null,
+                "Event has been processed. Query delivery-tracker service for detailed status."
+        );
 
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            log.error("[ERROR] Failed to get delivery status: eventId={}", eventId, e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Get all delivery attempts for a notification per channel
-     *
-     * Returns detailed attempt history including timestamps and errors.
-     */
     @GetMapping("/{eventId}/attempts")
     @Operation(
             summary = "Get delivery attempts",
@@ -193,31 +138,17 @@ public class NotificationController {
             @Parameter(description = "Event ID", required = true)
             @PathVariable String eventId) {
 
-        try {
-            log.debug("[REST] Getting delivery attempts: eventId={}", eventId);
+        log.debug("[REST] Getting delivery attempts: eventId={}", eventId);
 
-            // In a real system, this would call the delivery-tracker service
-            // For now, return a placeholder
-            AttemptsResponse response = new AttemptsResponse(
-                    eventId,
-                    "Query delivery-tracker service at http://localhost:8003/api/v1/delivery-attempts/events/" + eventId
-            );
+        AttemptsResponse response = new AttemptsResponse(
+                eventId,
+                "Query delivery-tracker service at http://localhost:8003/api/v1/delivery-attempts/events/" + eventId
+        );
 
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            log.error("[ERROR] Failed to get delivery attempts: eventId={}", eventId, e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Response DTO for delivery status
-     */
     public record DeliveryStatusResponse(String eventId, DeliveryStatus overallStatus, String message) {}
 
-    /**
-     * Response DTO for delivery attempts
-     */
     public record AttemptsResponse(String eventId, String message) {}
 }

@@ -1,8 +1,8 @@
 package delivery.adapter.postgres.entity;
 
-import delivery.domain.channel.Channel;
-import delivery.domain.event.EventType;
-import delivery.domain.model.DeliveryStatus;
+import com.notification.common.domain.Channel;
+import com.notification.common.domain.EventType;
+import com.notification.common.domain.DeliveryStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

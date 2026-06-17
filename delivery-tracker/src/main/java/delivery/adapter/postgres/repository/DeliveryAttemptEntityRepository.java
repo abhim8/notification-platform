@@ -1,8 +1,8 @@
 package delivery.adapter.postgres.repository;
 
 import delivery.adapter.postgres.entity.DeliveryAttemptEntity;
-import delivery.domain.channel.Channel;
-import delivery.domain.model.DeliveryStatus;
+import com.notification.common.domain.Channel;
+import com.notification.common.domain.DeliveryStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

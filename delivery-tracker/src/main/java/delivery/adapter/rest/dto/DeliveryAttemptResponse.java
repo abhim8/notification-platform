@@ -1,14 +1,11 @@
 package delivery.adapter.rest.dto;
 
-import delivery.domain.channel.Channel;
-import delivery.domain.event.EventType;
-import delivery.domain.model.DeliveryStatus;
+import com.notification.common.domain.Channel;
+import com.notification.common.domain.DeliveryStatus;
+import com.notification.common.domain.EventType;
 
 import java.time.LocalDateTime;
 
-/**
- * DTO for delivery attempt REST API responses
- */
 public record DeliveryAttemptResponse(
     Long id,
     String eventId,

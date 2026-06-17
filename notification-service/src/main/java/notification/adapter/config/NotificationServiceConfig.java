@@ -6,7 +6,7 @@ import notification.application.service.FailedDeliveryLoader;
 import notification.application.service.TemplateResolver;
 import notification.application.usecase.RetryUseCase;
 import notification.application.usecase.SendNotificationUseCase;
-import notification.domain.channel.Channel;
+import com.notification.common.domain.Channel;
 import notification.domain.channel.ChannelDispatcher;
 import notification.domain.model.RetryPolicy;
 import org.springframework.context.annotation.Bean;

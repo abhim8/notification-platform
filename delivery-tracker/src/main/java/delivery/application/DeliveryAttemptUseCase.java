@@ -2,8 +2,8 @@ package delivery.application;
 
 import delivery.adapter.postgres.entity.DeliveryAttemptEntity;
 import delivery.adapter.postgres.repository.DeliveryAttemptEntityRepository;
-import delivery.domain.channel.Channel;
-import delivery.domain.model.DeliveryStatus;
+import com.notification.common.domain.Channel;
+import com.notification.common.domain.DeliveryStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;

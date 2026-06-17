@@ -1,7 +1,7 @@
 package notification.adapter.channels.push;
 
 import lombok.extern.slf4j.Slf4j;
-import notification.domain.channel.Channel;
+import com.notification.common.domain.Channel;
 import notification.domain.channel.ChannelDispatcher;
 import notification.domain.channel.DispatchResult;
 import notification.domain.event.NotificationEvent;

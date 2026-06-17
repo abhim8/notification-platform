@@ -4,11 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import notification.application.service.DeduplicationService;
 import notification.application.service.DeliveryAttemptRecorder;
 import notification.application.service.TemplateResolver;
-import notification.domain.channel.Channel;
+import com.notification.common.domain.Channel;
 import notification.domain.channel.ChannelDispatcher;
 import notification.domain.channel.DispatchResult;
 import notification.domain.event.NotificationEvent;
-import notification.domain.model.DeliveryStatus;
+import com.notification.common.domain.DeliveryStatus;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,5 +1,6 @@
 package notification.domain.channel;
 
+import com.notification.common.domain.Channel;
 import notification.domain.event.NotificationEvent;
 
 /**

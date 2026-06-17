@@ -1,7 +1,7 @@
 package notification.infrastructure.deliverytracker;
 
 import notification.application.usecase.DeliveryAttemptCommand;
-import notification.domain.model.DeliveryStatus;
+import com.notification.common.domain.DeliveryStatus;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;

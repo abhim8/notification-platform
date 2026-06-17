@@ -1,9 +1,5 @@
-package notification.domain.event;
+package com.notification.common.domain;
 
-/**
- * Enumeration of supported notification event types.
- * Each event type can be routed to different channels and use different templates.
- */
 public enum EventType {
     ORDER_PLACED("order-confirm"),
     ORDER_SHIPPED("order-shipped"),
@@ -26,4 +22,3 @@ public enum EventType {
         return defaultTemplateId;
     }
 }
-

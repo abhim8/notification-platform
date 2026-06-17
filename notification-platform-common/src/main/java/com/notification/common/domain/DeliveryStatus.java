@@ -1,4 +1,4 @@
-package delivery.domain.model;
+package com.notification.common.domain;
 
 public enum DeliveryStatus {
     PENDING,

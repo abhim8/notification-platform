@@ -3,7 +3,7 @@ package template.adapter.postgres.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import template.domain.event.EventType;
+import com.notification.common.domain.EventType;
 
 import java.time.LocalDateTime;
 

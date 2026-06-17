@@ -16,6 +16,12 @@
     <description>Template management service for notification platform</description>
 
     <dependencies>
+        <!-- Common Module -->
+        <dependency>
+            <groupId>com.notification</groupId>
+            <artifactId>notification-platform-common</artifactId>
+        </dependency>
+
         <!-- JPA for TemplateEntity persistence -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

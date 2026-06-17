@@ -1,6 +1,6 @@
 package template.domain;
 
-import template.domain.event.EventType;
+import com.notification.common.domain.EventType;
 
 import java.time.LocalDateTime;
 

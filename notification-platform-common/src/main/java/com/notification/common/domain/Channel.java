@@ -1,15 +1,8 @@
-package notification.domain.channel;
+package com.notification.common.domain;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-/**
- * Enumeration of supported notification channels.
- * Each channel has its own adapter implementation.
- *
- * <p>Uses {@link JsonValue} for serialization (lowercase) and
- * {@link JsonCreator} for case-insensitive deserialization.</p>
- */
 public enum Channel {
     EMAIL("email"),
     SMS("sms"),
@@ -27,10 +20,6 @@ public enum Channel {
         return value;
     }
 
-    /**
-     * Returns the payload key used to look up the recipient for this channel.
-     * Format: {@code <channel_value>_recipient} (e.g., {@code email_recipient})
-     */
     public String recipientKey() {
         return value + "_recipient";
     }
@@ -48,4 +37,3 @@ public enum Channel {
         throw new IllegalArgumentException("Unknown channel: " + value);
     }
 }
-

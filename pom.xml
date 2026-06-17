@@ -12,6 +12,7 @@
     <description>Production-grade event-driven notification platform</description>
 
     <modules>
+        <module>notification-platform-common</module>
         <module>notification-service</module>
         <module>template-service</module>
         <module>delivery-tracker</module>
@@ -49,6 +50,13 @@
                 <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <!-- Common Module -->
+            <dependency>
+                <groupId>com.notification</groupId>
+                <artifactId>notification-platform-common</artifactId>
+                <version>${project.version}</version>
             </dependency>
 
             <!-- Lombok -->
@@ -181,6 +189,12 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!-- Jakarta Validation (required by all services) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
         <!-- Testing (required by all services) -->

@@ -17,6 +17,12 @@
     <description>Core notification service with Kafka consumer, channel dispatcher, and retry logic</description>
 
     <dependencies>
+        <!-- Common Module -->
+        <dependency>
+            <groupId>com.notification</groupId>
+            <artifactId>notification-platform-common</artifactId>
+        </dependency>
+
         <!-- JPA is NOT needed — no entities; JDBC starter provides DataSource + HikariCP for ShedLock -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

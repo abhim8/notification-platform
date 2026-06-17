@@ -1,12 +1,9 @@
 package template.adapter.rest.dto;
 
-import template.domain.event.EventType;
+import com.notification.common.domain.EventType;
 
 import java.time.LocalDateTime;
 
-/**
- * DTO for template REST API responses
- */
 public record TemplateResponse(
     String id,
     EventType eventType,
@@ -18,4 +15,3 @@ public record TemplateResponse(
     LocalDateTime createdAt,
     LocalDateTime updatedAt
 ) {}
-

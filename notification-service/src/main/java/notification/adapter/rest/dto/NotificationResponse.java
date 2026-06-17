@@ -1,13 +1,12 @@
 package notification.adapter.rest.dto;
 
+import com.notification.common.domain.Channel;
+import com.notification.common.domain.DeliveryStatus;
 import notification.domain.channel.DispatchResult;
 import notification.domain.model.NotificationStatus;
 
 import java.util.Map;
 
-/**
- * Response DTO for notification send operation
- */
 public record NotificationResponse(
     String eventId,
     boolean success,
