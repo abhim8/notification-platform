@@ -1,7 +1,5 @@
 databaseChangeLog:
   - include:
-      file: db/changelog/v1__create_schema.xml
+      file: db/changelog/v1__create_notifications.xml
   - include:
-      file: db/changelog/v2__create_notifications.xml
-  - include:
-      file: db/changelog/v3__create_shedlock.xml
+      file: db/changelog/v2__create_shedlock.xml

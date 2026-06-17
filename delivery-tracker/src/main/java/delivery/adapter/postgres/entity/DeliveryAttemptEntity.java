@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
 /**
  * JPA entity representing a delivery attempt record.
@@ -51,10 +51,10 @@ public class DeliveryAttemptEntity {
     private String errorMessage;
 
     @Column(name = "created_at", nullable = false)
-    private ZonedDateTime createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
-    private ZonedDateTime updatedAt;
+    private LocalDateTime updatedAt;
 
     public DeliveryAttemptEntity() {}
 
@@ -66,8 +66,8 @@ public class DeliveryAttemptEntity {
         this.channel = channel;
         this.status = status;
         this.attemptNumber = attemptNumber;
-        this.createdAt = ZonedDateTime.now();
-        this.updatedAt = ZonedDateTime.now();
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
 }

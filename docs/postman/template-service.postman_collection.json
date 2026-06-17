@@ -15,7 +15,7 @@
           "host": ["{{template_service_url}}"],
           "path": ["api", "v1", "templates"]
         },
-        "description": "Retrieves all templates in the database.\n\nResponse (200):\n```json\n[\n  {\n    \"id\": \"tpl-welcome\",\n    \"eventType\": \"TRANSACTIONAL\",\n    \"name\": \"Welcome Email\",\n    \"subject\": \"Welcome {{userName}}!\",\n    \"body\": \"Hello {{userName}},\\n\\nYour account {{accountId}} has been credited with ${{amount}}.\",\n    \"version\": 1,\n    \"active\": true,\n    \"createdAt\": \"2025-01-01T00:00:00Z\",\n    \"updatedAt\": \"2025-01-15T12:00:00Z\"\n  }\n]\n```"
+        "description": "Retrieves all templates in the database.\n\nResponse (200):\n```json\n[\n  {\n    \"id\": \"tpl-welcome\",\n    \"eventType\": \"TRANSACTIONAL\",\n    \"name\": \"Welcome Email\",\n    \"subject\": \"Welcome {{userName}}!\",\n    \"body\": \"Hello {{userName}},\\n\\nYour account {{accountId}} has been credited with ${{amount}}.\",\n    \"version\": 1,\n    \"active\": true,\n    \"createdAt\": \"2025-01-01T00:00:00\",\n    \"updatedAt\": \"2025-01-15T12:00:00\"\n  }\n]\n```"
       },
       "response": []
     },
@@ -36,7 +36,7 @@
             }
           ]
         },
-        "description": "Retrieves a template by ID without rendering.\n\nResponse (200):\n```json\n{\n  \"id\": \"tpl-welcome\",\n  \"eventType\": \"TRANSACTIONAL\",\n  \"name\": \"Welcome Email\",\n  \"subject\": \"Welcome {{userName}}!\",\n  \"body\": \"Hello {{userName}},\\n\\nYour account {{accountId}} has been credited with ${{amount}}.\",\n  \"version\": 1,\n  \"active\": true,\n  \"createdAt\": \"2025-01-01T00:00:00Z\",\n  \"updatedAt\": \"2025-01-15T12:00:00Z\"\n}\n```\n\nResponse (404): Template not found."
+        "description": "Retrieves a template by ID without rendering.\n\nResponse (200):\n```json\n{\n  \"id\": \"tpl-welcome\",\n  \"eventType\": \"TRANSACTIONAL\",\n  \"name\": \"Welcome Email\",\n  \"subject\": \"Welcome {{userName}}!\",\n  \"body\": \"Hello {{userName}},\\n\\nYour account {{accountId}} has been credited with ${{amount}}.\",\n  \"version\": 1,\n  \"active\": true,\n  \"createdAt\": \"2025-01-01T00:00:00\",\n  \"updatedAt\": \"2025-01-15T12:00:00\"\n}\n```\n\nResponse (404): Template not found."
       },
       "response": []
     },

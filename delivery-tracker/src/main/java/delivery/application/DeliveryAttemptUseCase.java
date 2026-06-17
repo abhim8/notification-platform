@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,7 +36,7 @@ public class DeliveryAttemptUseCase {
 
     public List<DeliveryAttemptEntity> getAttemptsByUser(String userId) {
         log.debug("Fetching attempts for user: {}", userId);
-        return repository.findByUserIdAndCreatedAtAfter(userId, ZonedDateTime.now().minusDays(30));
+        return repository.findByUserIdAndCreatedAtAfter(userId, LocalDateTime.now().minusDays(30));
     }
 
     public DeliveryAttemptEntity createAttempt(CreateAttemptCommand command) {
@@ -55,9 +55,9 @@ public class DeliveryAttemptUseCase {
     }
 
     public List<DeliveryAttemptEntity> getFailedAttempts(String since, int limit) {
-        ZonedDateTime cutoff = since != null
-                ? ZonedDateTime.parse(since)
-                : ZonedDateTime.now().minusDays(1);
+        LocalDateTime cutoff = since != null
+                ? LocalDateTime.parse(since)
+                : LocalDateTime.now().minusDays(1);
         return repository.findByStatusAndUpdatedAtAfterOrderByUpdatedAtAsc(
                 "FAILED", cutoff, PageRequest.of(0, limit));
     }

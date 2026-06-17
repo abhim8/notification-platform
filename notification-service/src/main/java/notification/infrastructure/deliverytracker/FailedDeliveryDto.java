@@ -1,6 +1,6 @@
 package notification.infrastructure.deliverytracker;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
 record FailedDeliveryDto(
     String eventId,
@@ -8,5 +8,5 @@ record FailedDeliveryDto(
     String eventType,
     String channel,
     int attemptNumber,
-    ZonedDateTime updatedAt
+    LocalDateTime updatedAt
 ) {}

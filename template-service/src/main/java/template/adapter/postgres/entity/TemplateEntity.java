@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
 /**
  * JPA entity for Template persistence in PostgreSQL.
@@ -42,10 +42,10 @@ public class TemplateEntity {
     private Boolean active;
 
     @Column(name = "created_at", nullable = false)
-    private ZonedDateTime createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
-    private ZonedDateTime updatedAt;
+    private LocalDateTime updatedAt;
 
     public TemplateEntity() {}
 
@@ -58,8 +58,8 @@ public class TemplateEntity {
         this.body = body;
         this.version = version;
         this.active = active;
-        this.createdAt = ZonedDateTime.now();
-        this.updatedAt = ZonedDateTime.now();
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
 }

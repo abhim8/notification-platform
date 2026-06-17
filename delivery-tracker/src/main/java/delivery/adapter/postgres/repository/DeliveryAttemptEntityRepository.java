@@ -5,7 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -32,7 +32,7 @@ public interface DeliveryAttemptEntityRepository extends JpaRepository<DeliveryA
     /**
      * Find attempts for a user created after a given timestamp
      */
-    List<DeliveryAttemptEntity> findByUserIdAndCreatedAtAfter(String userId, ZonedDateTime since);
+    List<DeliveryAttemptEntity> findByUserIdAndCreatedAtAfter(String userId, LocalDateTime since);
 
     /**
      * Find attempts with given status
@@ -43,7 +43,7 @@ public interface DeliveryAttemptEntityRepository extends JpaRepository<DeliveryA
      * Find failed attempts for retry, ordered by recency
      */
     List<DeliveryAttemptEntity> findByStatusAndUpdatedAtAfterOrderByUpdatedAtAsc(
-            String status, ZonedDateTime since, Pageable pageable);
+            String status, LocalDateTime since, Pageable pageable);
 
     /**
      * Count attempts by event ID and channel

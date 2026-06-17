@@ -5,6 +5,9 @@ import notification.domain.channel.Channel;
 import notification.domain.model.DeliveryStatus;
 import notification.domain.model.RetryPolicy;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 /**
  * Use case for retrying failed notification deliveries.
  *
@@ -71,7 +74,7 @@ public class RetryUseCase {
 
             // Calculate delay for this attempt
             long delayMs = retryPolicy.getDelayForAttempt(attemptCount);
-            long timeSinceLastAttempt = System.currentTimeMillis() - delivery.lastAttemptTime();
+            long timeSinceLastAttempt = Duration.between(delivery.lastAttemptTime(), LocalDateTime.now()).toMillis();
 
             // Check if enough time has passed since last attempt
             if (timeSinceLastAttempt < delayMs) {
@@ -122,7 +125,7 @@ public class RetryUseCase {
         String eventType,
         Channel channel,
         int attemptCount,
-        long lastAttemptTime
+        LocalDateTime lastAttemptTime
     ) {}
 }
 

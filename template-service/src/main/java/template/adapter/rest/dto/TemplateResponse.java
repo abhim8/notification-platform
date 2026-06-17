@@ -1,6 +1,6 @@
 package template.adapter.rest.dto;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
 /**
  * DTO for template REST API responses
@@ -13,7 +13,7 @@ public record TemplateResponse(
     String body,
     int version,
     boolean active,
-    ZonedDateTime createdAt,
-    ZonedDateTime updatedAt
+    LocalDateTime createdAt,
+    LocalDateTime updatedAt
 ) {}
 

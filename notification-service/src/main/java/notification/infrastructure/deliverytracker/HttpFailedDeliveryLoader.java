@@ -7,7 +7,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -26,7 +26,7 @@ public class HttpFailedDeliveryLoader implements RetryUseCase.FailedDeliveryLoad
         try {
             log.debug("[TRACKER] Loading failed deliveries via HTTP");
             String url = baseUrl + "/api/v1/delivery-attempts/failed?since={since}&limit={limit}";
-            ZonedDateTime since = ZonedDateTime.now().minusDays(1);
+            LocalDateTime since = LocalDateTime.now().minusDays(1);
 
             List<FailedDeliveryDto> dtos = restTemplate.exchange(
                     url, HttpMethod.GET, null,
@@ -45,7 +45,7 @@ public class HttpFailedDeliveryLoader implements RetryUseCase.FailedDeliveryLoad
                             dto.eventType(),
                             Channel.fromString(dto.channel()),
                             dto.attemptNumber(),
-                            dto.updatedAt().toInstant().toEpochMilli()
+                            dto.updatedAt()
                     ))
                     .toList();
 

@@ -1,6 +1,6 @@
 package template.domain;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
 /**
  * Domain model representing a notification template.
@@ -16,8 +16,8 @@ public record Template(
     String body,
     int version,
     boolean active,
-    ZonedDateTime createdAt,
-    ZonedDateTime updatedAt
+    LocalDateTime createdAt,
+    LocalDateTime updatedAt
 ) {
 
     /**

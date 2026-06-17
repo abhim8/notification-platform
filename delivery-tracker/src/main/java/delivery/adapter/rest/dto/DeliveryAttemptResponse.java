@@ -1,6 +1,6 @@
 package delivery.adapter.rest.dto;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 
 /**
  * DTO for delivery attempt REST API responses
@@ -15,7 +15,7 @@ public record DeliveryAttemptResponse(
     Integer attemptNumber,
     String messageId,
     String errorMessage,
-    ZonedDateTime createdAt,
-    ZonedDateTime updatedAt
+    LocalDateTime createdAt,
+    LocalDateTime updatedAt
 ) {}
 
