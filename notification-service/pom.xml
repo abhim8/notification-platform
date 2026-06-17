@@ -23,7 +23,7 @@
             <artifactId>notification-platform-common</artifactId>
         </dependency>
 
-        <!-- JPA is NOT needed — no entities; JDBC starter provides DataSource + HikariCP for ShedLock -->
+        <!-- JPA is NOT needed - no entities; JDBC starter provides DataSource + HikariCP for ShedLock -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>

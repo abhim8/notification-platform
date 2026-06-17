@@ -447,6 +447,5 @@ mvn clean
 For issues or questions about the notification platform, refer to:
 - API Documentation: http://localhost:PORT/swagger-ui.html
 - Logs: target/notification-service.log (or relevant service)
-- Database Schema: init-db.sql
 - Docker Compose: docker-compose.yml
 

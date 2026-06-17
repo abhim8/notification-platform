@@ -24,7 +24,7 @@ graph TD
     B -->|Kafka: notification.alerts| C
     C --> D{Channel Dispatcher}
     D -->|Internal API| E(Template Service)
-    D -->|External APIs (Mocked)| F(SendGrid, Twilio, FCM, Webhook)
+    D -->|"External APIs (Mocked)"| F(SendGrid, Twilio, FCM, Webhook)
     D -->|Internal API| G(Delivery Tracker)
     G --> H(PostgreSQL)
     C --> I(Redis - Deduplication)
