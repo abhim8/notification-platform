@@ -1,0 +1,107 @@
+{
+  "info": {
+    "name": "template-service",
+    "description": "REST API for retrieving and rendering notification templates.\n\nBase URL: {{template_service_url}} (default: http://localhost:8002)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Templates",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{template_service_url}}/api/v1/templates",
+          "host": ["{{template_service_url}}"],
+          "path": ["api", "v1", "templates"]
+        },
+        "description": "Retrieves all templates in the database.\n\nResponse (200):\n```json\n[\n  {\n    \"id\": \"tpl-welcome\",\n    \"eventType\": \"TRANSACTIONAL\",\n    \"name\": \"Welcome Email\",\n    \"subject\": \"Welcome {{userName}}!\",\n    \"body\": \"Hello {{userName}},\\n\\nYour account {{accountId}} has been credited with ${{amount}}.\",\n    \"version\": 1,\n    \"active\": true,\n    \"createdAt\": \"2025-01-01T00:00:00Z\",\n    \"updatedAt\": \"2025-01-15T12:00:00Z\"\n  }\n]\n```"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Template by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{template_service_url}}/api/v1/templates/{{templateId}}",
+          "host": ["{{template_service_url}}"],
+          "path": ["api", "v1", "templates", "{{templateId}}"],
+          "variable": [
+            {
+              "key": "templateId",
+              "value": "tpl-welcome",
+              "description": "The template ID"
+            }
+          ]
+        },
+        "description": "Retrieves a template by ID without rendering.\n\nResponse (200):\n```json\n{\n  \"id\": \"tpl-welcome\",\n  \"eventType\": \"TRANSACTIONAL\",\n  \"name\": \"Welcome Email\",\n  \"subject\": \"Welcome {{userName}}!\",\n  \"body\": \"Hello {{userName}},\\n\\nYour account {{accountId}} has been credited with ${{amount}}.\",\n  \"version\": 1,\n  \"active\": true,\n  \"createdAt\": \"2025-01-01T00:00:00Z\",\n  \"updatedAt\": \"2025-01-15T12:00:00Z\"\n}\n```\n\nResponse (404): Template not found."
+      },
+      "response": []
+    },
+    {
+      "name": "Render Template",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userName\": \"Alice\",\n  \"accountId\": \"ACC-12345\",\n  \"amount\": 250.00\n}"
+        },
+        "url": {
+          "raw": "{{template_service_url}}/api/v1/templates/{{templateId}}/render",
+          "host": ["{{template_service_url}}"],
+          "path": ["api", "v1", "templates", "{{templateId}}", "render"],
+          "variable": [
+            {
+              "key": "templateId",
+              "value": "tpl-welcome",
+              "description": "The template ID"
+            }
+          ]
+        },
+        "description": "Retrieves a template and renders it with the provided payload.\n\nResponse (200):\n```json\n{\n  \"templateId\": \"tpl-welcome\",\n  \"content\": \"Hello Alice,\\n\\nYour account ACC-12345 has been credited with $250.00.\"\n}\n```\n\nResponse (404): Template not found.\nResponse (400): Invalid payload."
+      },
+      "response": []
+    },
+    {
+      "name": "Check Template Exists",
+      "request": {
+        "method": "HEAD",
+        "header": [],
+        "url": {
+          "raw": "{{template_service_url}}/api/v1/templates/{{templateId}}",
+          "host": ["{{template_service_url}}"],
+          "path": ["api", "v1", "templates", "{{templateId}}"],
+          "variable": [
+            {
+              "key": "templateId",
+              "value": "tpl-welcome",
+              "description": "The template ID"
+            }
+          ]
+        },
+        "description": "Checks whether a template exists and is active.\n\nHTTP 200: Template exists and is active.\nHTTP 404: Template not found or inactive."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "template_service_url",
+      "value": "http://localhost:8002",
+      "type": "string"
+    },
+    {
+      "key": "templateId",
+      "value": "tpl-welcome",
+      "type": "string"
+    }
+  ]
+}

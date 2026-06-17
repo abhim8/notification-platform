@@ -1,0 +1,86 @@
+{
+  "info": {
+    "name": "notification-service",
+    "description": "REST API for sending notifications, retrieving delivery status, and querying delivery attempts.\n\nBase URL: {{notification_service_url}} (default: http://localhost:8001)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Send Notification",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"eventId\": \"evt-001-20250101\",\n  \"eventType\": \"TRANSACTIONAL\",\n  \"userId\": \"usr-42\",\n  \"channels\": [\"email\", \"sms\"],\n  \"templateId\": \"tpl-welcome\",\n  \"payload\": {\n    \"userName\": \"Alice\",\n    \"accountId\": \"ACC-12345\",\n    \"amount\": 250.00\n  }\n}"
+        },
+        "url": {
+          "raw": "{{notification_service_url}}/api/v1/notifications",
+          "host": ["{{notification_service_url}}"],
+          "path": ["api", "v1", "notifications"]
+        },
+        "description": "Sends a notification to specified channels. Bypasses Kafka and dispatches synchronously.\n\nRequired fields: eventId, eventType, userId, channels (non-empty), templateId.\n\nResponse (200):\n```json\n{\n  \"eventId\": \"evt-001-20250101\",\n  \"success\": true,\n  \"status\": \"success\",\n  \"message\": \"Notification sent to 2 channels\",\n  \"channelResults\": {\n    \"email\": {\n      \"success\": true,\n      \"messageId\": \"msg-abc-123\",\n      \"errorMessage\": null\n    },\n    \"sms\": {\n      \"success\": false,\n      \"messageId\": null,\n      \"errorMessage\": \"Provider unavailable\"\n    }\n  }\n}\n```"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Delivery Status",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{notification_service_url}}/api/v1/notifications/{{eventId}}",
+          "host": ["{{notification_service_url}}"],
+          "path": ["api", "v1", "notifications", "{{eventId}}"],
+          "variable": [
+            {
+              "key": "eventId",
+              "value": "evt-001-20250101",
+              "description": "The unique event identifier"
+            }
+          ]
+        },
+        "description": "Retrieves the overall delivery status for a notification event.\n\nCurrently returns a placeholder response. For detailed per-channel status, query the delivery-tracker service directly.\n\nResponse (200):\n```json\n{\n  \"eventId\": \"evt-001-20250101\",\n  \"overallStatus\": \"UNKNOWN\",\n  \"message\": \"Event has been processed. Query delivery-tracker service for detailed status.\"\n}\n```"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Delivery Attempts",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{notification_service_url}}/api/v1/notifications/{{eventId}}/attempts",
+          "host": ["{{notification_service_url}}"],
+          "path": ["api", "v1", "notifications", "{{eventId}}", "attempts"],
+          "variable": [
+            {
+              "key": "eventId",
+              "value": "evt-001-20250101",
+              "description": "The unique event identifier"
+            }
+          ]
+        },
+        "description": "Returns a placeholder message with instructions to query the delivery-tracker service directly.\n\nResponse (200):\n```json\n{\n  \"eventId\": \"evt-001-20250101\",\n  \"message\": \"Query delivery-tracker service at http://localhost:8003/api/v1/delivery-attempts/events/evt-001-20250101\"\n}\n```"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "notification_service_url",
+      "value": "http://localhost:8001",
+      "type": "string"
+    },
+    {
+      "key": "eventId",
+      "value": "evt-001-20250101",
+      "type": "string"
+    }
+  ]
+}

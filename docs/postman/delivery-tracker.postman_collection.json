@@ -1,0 +1,174 @@
+{
+  "info": {
+    "name": "delivery-tracker",
+    "description": "REST API for recording and querying delivery attempt history.\n\nBase URL: {{delivery_tracker_url}} (default: http://localhost:8003)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Attempts by Event",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{delivery_tracker_url}}/api/v1/delivery-attempts/events/{{eventId}}",
+          "host": ["{{delivery_tracker_url}}"],
+          "path": ["api", "v1", "delivery-attempts", "events", "{{eventId}}"],
+          "variable": [
+            {
+              "key": "eventId",
+              "value": "evt-001-20250101",
+              "description": "The unique event identifier"
+            }
+          ]
+        },
+        "description": "Retrieves all delivery attempts for a specific event.\n\nResponse (200):\n```json\n[\n  {\n    \"id\": 1,\n    \"eventId\": \"evt-001-20250101\",\n    \"userId\": \"usr-42\",\n    \"eventType\": \"TRANSACTIONAL\",\n    \"channel\": \"email\",\n    \"status\": \"DELIVERED\",\n    \"attemptNumber\": 1,\n    \"messageId\": \"msg-abc-123\",\n    \"errorMessage\": null,\n    \"createdAt\": \"2025-01-01T10:00:00Z\",\n    \"updatedAt\": \"2025-01-01T10:00:05Z\"\n  }\n]\n```\n\nResponse (404): No attempts found for the given event."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Attempts by Event and Channel",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{delivery_tracker_url}}/api/v1/delivery-attempts/events/{{eventId}}/channels/{{channel}}",
+          "host": ["{{delivery_tracker_url}}"],
+          "path": ["api", "v1", "delivery-attempts", "events", "{{eventId}}", "channels", "{{channel}}"],
+          "variable": [
+            {
+              "key": "eventId",
+              "value": "evt-001-20250101",
+              "description": "The unique event identifier"
+            },
+            {
+              "key": "channel",
+              "value": "email",
+              "description": "Delivery channel (email, sms, push, webhook)"
+            }
+          ]
+        },
+        "description": "Retrieves all delivery attempts for a specific event and channel.\n\nResponse (200):\n```json\n[\n  {\n    \"id\": 1,\n    \"eventId\": \"evt-001-20250101\",\n    \"userId\": \"usr-42\",\n    \"eventType\": \"TRANSACTIONAL\",\n    \"channel\": \"email\",\n    \"status\": \"DELIVERED\",\n    \"attemptNumber\": 1,\n    \"messageId\": \"msg-abc-123\",\n    \"errorMessage\": null,\n    \"createdAt\": \"2025-01-01T10:00:00Z\",\n    \"updatedAt\": \"2025-01-01T10:00:05Z\"\n  }\n]\n```\n\nResponse (404): No attempts found."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Attempt by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{delivery_tracker_url}}/api/v1/delivery-attempts/{{attemptId}}",
+          "host": ["{{delivery_tracker_url}}"],
+          "path": ["api", "v1", "delivery-attempts", "{{attemptId}}"],
+          "variable": [
+            {
+              "key": "attemptId",
+              "value": "1",
+              "description": "The attempt ID (numeric)"
+            }
+          ]
+        },
+        "description": "Retrieves a single delivery attempt by its ID.\n\nResponse (200):\n```json\n{\n  \"id\": 1,\n  \"eventId\": \"evt-001-20250101\",\n  \"userId\": \"usr-42\",\n  \"eventType\": \"TRANSACTIONAL\",\n  \"channel\": \"email\",\n  \"status\": \"DELIVERED\",\n  \"attemptNumber\": 1,\n  \"messageId\": \"msg-abc-123\",\n  \"errorMessage\": null,\n  \"createdAt\": \"2025-01-01T10:00:00Z\",\n  \"updatedAt\": \"2025-01-01T10:00:05Z\"\n}\n```\n\nResponse (404): Attempt not found."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Attempts by User",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{delivery_tracker_url}}/api/v1/delivery-attempts/users/{{userId}}",
+          "host": ["{{delivery_tracker_url}}"],
+          "path": ["api", "v1", "delivery-attempts", "users", "{{userId}}"],
+          "variable": [
+            {
+              "key": "userId",
+              "value": "usr-42",
+              "description": "The user ID"
+            }
+          ]
+        },
+        "description": "Retrieves all delivery attempts for a specific user within the last 30 days.\n\nResponse (200):\n```json\n[\n  {\n    \"id\": 1,\n    \"eventId\": \"evt-001-20250101\",\n    \"userId\": \"usr-42\",\n    \"eventType\": \"TRANSACTIONAL\",\n    \"channel\": \"email\",\n    \"status\": \"DELIVERED\",\n    \"attemptNumber\": 1,\n    \"messageId\": \"msg-abc-123\",\n    \"errorMessage\": null,\n    \"createdAt\": \"2025-01-01T10:00:00Z\",\n    \"updatedAt\": \"2025-01-01T10:00:05Z\"\n  }\n]\n```\n\nResponse (404): No attempts found for the user."
+      },
+      "response": []
+    },
+    {
+      "name": "Record Delivery Attempt",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"eventId\": \"evt-001-20250101\",\n  \"userId\": \"usr-42\",\n  \"eventType\": \"TRANSACTIONAL\",\n  \"channel\": \"email\",\n  \"status\": \"DELIVERED\",\n  \"attemptNumber\": 1,\n  \"messageId\": \"msg-abc-123\",\n  \"errorMessage\": null\n}"
+        },
+        "url": {
+          "raw": "{{delivery_tracker_url}}/api/v1/delivery-attempts",
+          "host": ["{{delivery_tracker_url}}"],
+          "path": ["api", "v1", "delivery-attempts"]
+        },
+        "description": "Records a delivery attempt for a notification event.\n\nResponse (201):\n```json\n{\n  \"id\": 1,\n  \"eventId\": \"evt-001-20250101\",\n  \"userId\": \"usr-42\",\n  \"eventType\": \"TRANSACTIONAL\",\n  \"channel\": \"email\",\n  \"status\": \"DELIVERED\",\n  \"attemptNumber\": 1,\n  \"messageId\": \"msg-abc-123\",\n  \"errorMessage\": null,\n  \"createdAt\": \"2025-01-01T10:00:00Z\",\n  \"updatedAt\": \"2025-01-01T10:00:00Z\"\n}\n```\n\nResponse (400): Invalid request body."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Failed Attempts",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{delivery_tracker_url}}/api/v1/delivery-attempts/failed?since=2025-06-01T00:00:00Z&limit=100",
+          "host": ["{{delivery_tracker_url}}"],
+          "path": ["api", "v1", "delivery-attempts", "failed"],
+          "query": [
+            {
+              "key": "since",
+              "value": "2025-06-01T00:00:00Z",
+              "description": "ISO-8601 timestamp — only attempts updated after this time are returned. Defaults to 24 hours ago."
+            },
+            {
+              "key": "limit",
+              "value": "100",
+              "description": "Maximum number of attempts to return. Default: 100."
+            }
+          ]
+        },
+        "description": "Retrieves failed delivery attempts for retry processing, ordered by oldest update first.\n\nResponse (200):\n```json\n[\n  {\n    \"id\": 2,\n    \"eventId\": \"evt-002-20250101\",\n    \"userId\": \"usr-99\",\n    \"eventType\": \"TRANSACTIONAL\",\n    \"channel\": \"sms\",\n    \"status\": \"FAILED\",\n    \"attemptNumber\": 1,\n    \"messageId\": null,\n    \"errorMessage\": \"Provider unavailable\",\n    \"createdAt\": \"2025-01-01T11:00:00Z\",\n    \"updatedAt\": \"2025-01-01T11:00:03Z\"\n  }\n]\n```"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "delivery_tracker_url",
+      "value": "http://localhost:8003",
+      "type": "string"
+    },
+    {
+      "key": "eventId",
+      "value": "evt-001-20250101",
+      "type": "string"
+    },
+    {
+      "key": "channel",
+      "value": "email",
+      "type": "string"
+    },
+    {
+      "key": "attemptId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "usr-42",
+      "type": "string"
+    }
+  ]
+}

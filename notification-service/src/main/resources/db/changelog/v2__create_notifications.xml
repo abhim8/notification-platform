@@ -7,7 +7,7 @@
         http://www.liquibase.org/xml/ns/dbchangelog
         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="3-create-notifications" author="abhilash">
+    <changeSet id="v2-create-notifications" author="abhilash">
 
         <createTable tableName="notifications">
 

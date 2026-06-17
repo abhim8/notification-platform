@@ -15,6 +15,7 @@ import template.application.TemplateUseCase;
 import template.application.TemplateNotFoundException;
 import template.domain.Template;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,6 +28,29 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class TemplateController {
     private final TemplateUseCase templateUseCase;
+
+    /**
+     * Get all templates
+     */
+    @GetMapping
+    @Operation(summary = "Get all templates", description = "Retrieves all templates in the database")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Templates retrieved successfully")
+    })
+    public ResponseEntity<List<TemplateResponse>> getAllTemplates() {
+        log.debug("GET /api/v1/templates");
+
+        List<Template> templates = templateUseCase.getAllTemplates();
+
+        List<TemplateResponse> responses = templates.stream()
+                .map(t -> new TemplateResponse(
+                        t.id(), t.eventType(), t.name(),
+                        t.subject(), t.body(), t.version(),
+                        t.active(), t.createdAt(), t.updatedAt()))
+                .toList();
+
+        return ResponseEntity.ok(responses);
+    }
 
     /**
      * Get a template by ID
@@ -116,12 +140,12 @@ public class TemplateController {
             @ApiResponse(responseCode = "404", description = "Template not found")
     })
     public ResponseEntity<Void> templateExists(
-            @Parameter(description = "Template ID", required = true)
-            @PathVariable String templateId) {
+            @PathVariable @Parameter(description = "Template ID", required = true) String templateId) {
 
         if (templateUseCase.templateExists(templateId)) {
             return ResponseEntity.ok().build();
         } else {
+            log.warn("Template not-found: {}", templateId);
             return ResponseEntity.notFound().build();
         }
     }

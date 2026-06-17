@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import template.domain.Template;
 import template.domain.TemplateRepository;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -57,6 +58,16 @@ public class TemplateUseCase {
 
         log.debug("[SUCCESS] Template retrieved: templateId={}, eventType={}", templateId, template.eventType());
         return template;
+    }
+
+    /**
+     * Get all templates
+     *
+     * @return list of all templates
+     */
+    public List<Template> getAllTemplates() {
+        log.debug("[TEMPLATE] Retrieving all templates");
+        return repository.findAll();
     }
 
     /**

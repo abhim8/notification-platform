@@ -7,7 +7,7 @@
             http://www.liquibase.org/xml/ns/dbchangelog
             https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="1-schema" author="abhilash">
+    <changeSet id="v1-schema" author="abhilash">
         <sql>
             CREATE SCHEMA IF NOT EXISTS notification_schema;
         </sql>
