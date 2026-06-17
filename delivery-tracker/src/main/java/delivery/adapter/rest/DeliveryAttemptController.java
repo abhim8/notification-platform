@@ -1,6 +1,7 @@
 package delivery.adapter.rest;
 
 import com.notification.common.domain.Channel;
+import com.notification.common.exception.BadRequestException;
 import com.notification.common.exception.NotFoundException;
 import delivery.adapter.postgres.entity.DeliveryAttemptEntity;
 import delivery.adapter.rest.dto.CreateDeliveryAttemptRequest;
@@ -69,7 +70,12 @@ public class DeliveryAttemptController {
 
         log.debug("GET /api/v1/delivery-attempts/events/{}/channels/{}", eventId, channel);
 
-        Channel channelEnum = Channel.fromString(channel);
+        Channel channelEnum;
+        try {
+            channelEnum = Channel.fromString(channel);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Invalid channel: " + channel);
+        }
         List<DeliveryAttemptEntity> attempts = useCase.getAttemptsByEventAndChannel(eventId, channelEnum);
 
         if (attempts.isEmpty()) {

@@ -1,7 +1,5 @@
 package notification.adapter.rest.dto;
 
-import com.notification.common.domain.Channel;
-import com.notification.common.domain.DeliveryStatus;
 import notification.domain.channel.DispatchResult;
 import notification.domain.model.NotificationStatus;
 

@@ -8,9 +8,11 @@ import com.notification.common.exception.InternalServerException;
 import com.notification.common.exception.NotFoundException;
 import com.notification.common.exception.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
+import com.notification.common.config.MdcFilter;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestControllerAdvice
@@ -96,12 +99,6 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, "Malformed request body", request, null);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
-        log.warn("Invalid argument: {}", ex.getMessage());
-        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request, null);
-    }
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllUncaught(Exception ex, HttpServletRequest request) {
         log.error("Unhandled exception", ex);
@@ -109,7 +106,15 @@ public class GlobalExceptionHandler {
     }
 
     private static ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String message, HttpServletRequest request, List<ValidationError> details) {
-        ErrorResponse body = ErrorResponse.of(status, message, request.getRequestURI(), details);
-        return new ResponseEntity<>(body, status);
+        String traceId = MDC.get(MdcFilter.MDC_TRACE_ID_KEY);
+        return ResponseEntity.status(status)
+                .body(new ErrorResponse(
+                        LocalDateTime.now(),
+                        status.value(),
+                        status.getReasonPhrase(),
+                        message,
+                        request.getRequestURI(),
+                        traceId,
+                        details));
     }
 }
