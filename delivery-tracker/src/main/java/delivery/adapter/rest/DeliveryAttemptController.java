@@ -66,17 +66,12 @@ public class DeliveryAttemptController {
             @Parameter(description = "Event ID", required = true)
             @PathVariable String eventId,
             @Parameter(description = "Channel (email, sms, push, webhook)", required = true)
-            @PathVariable String channel) {
+            @PathVariable Channel channel) {
 
         log.debug("GET /api/v1/delivery-attempts/events/{}/channels/{}", eventId, channel);
 
-        Channel channelEnum;
-        try {
-            channelEnum = Channel.fromString(channel);
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Invalid channel: " + channel);
-        }
-        List<DeliveryAttemptEntity> attempts = useCase.getAttemptsByEventAndChannel(eventId, channelEnum);
+
+        List<DeliveryAttemptEntity> attempts = useCase.getAttemptsByEventAndChannel(eventId, channel);
 
         if (attempts.isEmpty()) {
             throw new NotFoundException("No delivery attempts found for event: " + eventId + " and channel: " + channel);

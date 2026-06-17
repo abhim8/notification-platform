@@ -1,191 +1,307 @@
 # Notification Platform
 
-A production-grade, event-driven notification platform built with Java Spring Boot and Apache Kafka. Supports multi-channel delivery (email, SMS, push, webhook) with idempotency, retry logic, dead letter queues, and per-channel delivery tracking.
+## Project Overview
 
----
+This is a production-grade, event-driven notification platform designed for reliable and scalable communication across various channels. It's built with modern Java and Spring Boot practices, emphasizing clear architectural boundaries and robust handling of notifications.
 
-## Motivation
+### Key Features
+*   **Multi-channel Notifications:** Supports email, SMS, push notifications, and webhooks.
+*   **Event-Driven Architecture:** Utilizes Apache Kafka for asynchronous message processing.
+*   **Template Management:** Centralized service for managing and rendering notification templates.
+*   **Delivery Tracking:** Comprehensive tracking of all notification delivery attempts.
+*   **Idempotency & Retry Mechanisms:** Ensures reliable delivery with deduplication and configurable retry policies.
+*   **Observability:** Integrated logging with MDC for tracing requests across services.
 
-Most notification systems start simple and become a mess - scattered `sendEmail()` calls across services, no retry handling, no deduplication, and zero visibility into what actually got delivered. This project builds the right foundation: a dedicated notification service that any upstream service can publish to, with guaranteed delivery semantics and full observability.
+## High-Level Architecture
 
----
+The platform consists of several interconnected microservices, each with distinct responsibilities, communicating primarily via Kafka for asynchronous operations and REST APIs for synchronous interactions.
 
-## Architecture
-
-```
-Producers (Order / Auth / Alert / Promo services)
-        │
-        ▼
-  Apache Kafka
-  ├── notification.transactional   (6 partitions, 7d retention)
-  ├── notification.marketing       (3 partitions, 3d retention)
-  ├── notification.alerts          (6 partitions, 1d retention)
-  ├── notification.retry           (3 partitions, 2d retention)
-  └── notification.dlq             (3 partitions, 14d retention)
-        │
-        ▼
-  Notification Service  ◄──►  Template Service
-        │                            │
-        ├── Email (SendGrid)             └── PostgreSQL (templates)
-        ├── SMS (Twilio)
-        ├── Push (Firebase FCM)
-        └── Webhook (outbound HTTP)
-        │
-        ▼
-  Delivery Tracker (PostgreSQL)
-  Retry Scheduler (ShedLock + Redis)
-  DLQ Consumer (exponential backoff)
+```mermaid
+graph TD
+    A[Client/API Gateway] -->|REST| B(Notification Service)
+    B -->|Kafka: notification.transactional| C(Notification Service Consumer)
+    B -->|Kafka: notification.marketing| C
+    B -->|Kafka: notification.alerts| C
+    C --> D{Channel Dispatcher}
+    D -->|Internal API| E(Template Service)
+    D -->|External APIs (Mocked)| F(SendGrid, Twilio, FCM, Webhook)
+    D -->|Internal API| G(Delivery Tracker)
+    G --> H(PostgreSQL)
+    C --> I(Redis - Deduplication)
+    C --> J(ShedLock - Retry Scheduler)
+    J -->|Kafka: notification.retry| C
+    C -->|After retries exhausted| K(Kafka: notification.dlq)
 ```
 
-**Key design decisions:**
+## Module Structure
 
-- Partition key = `userId` - guarantees ordered delivery per user within a topic
-- Idempotency key per event - deduplicated via Redis with a 24h window
-- Failed deliveries retry 3 times (backoff: 1s -> 5s -> 30s), then route to DLQ
-- `transactional` and `marketing` topics are separated so SLA differences can be enforced at the consumer group level
-- Hexagonal architecture throughout - Kafka adapters, channel adapters, and infrastructure are all behind ports
+The project is structured into a multi-module Maven build, ensuring clear separation of concerns:
 
----
+*   **`notification-platform`**: The root project, aggregating all modules.
+*   **`notification-platform-common`**: Shared utilities, domain enums, exceptions, and auto-configurations.
+*   **`notification-service`**: Core service for consuming events, dispatching to channels, managing idempotency, and retry logic.
+*   **`template-service`**: Manages notification templates and renders them with provided data.
+*   **`delivery-tracker`**: Records and provides history for all notification delivery attempts.
 
-## Tech stack
+## Purpose of Each Service
 
-| Layer | Technology |
-|---|---|
-| Language | Java 23 |
-| Framework | Spring Boot 3.x |
-| Messaging | Apache Kafka |
-| Cache / dedup | Redis |
-| Database | PostgreSQL |
-| Distributed lock | ShedLock |
-| Email | SendGrid |
-| SMS | Twilio |
-| Push | Firebase FCM |
-| Containerisation | Docker Compose |
+*   **Notification Service (Port 8001):** The central orchestration service. It consumes notification requests from Kafka, performs deduplication, resolves templates (via `template-service`), dispatches notifications through various channels, records delivery attempts (via `delivery-tracker`), and manages retry schedules.
+*   **Template Service (Port 8002):** Provides an API for managing and rendering notification templates. It stores templates in PostgreSQL and offers endpoints to retrieve and render them with dynamic data.
+*   **Delivery Tracker (Port 8003):** A dedicated service for persisting and querying the history of all delivery attempts made by the notification platform. It stores data in PostgreSQL and supports querying by event ID, user ID, and channel.
+*   **Notification Platform Common:** This module encapsulates shared domain models (like `Channel`, `EventType`, `DeliveryStatus`), a unified exception hierarchy, common DTOs, and global configurations such as MDC (Mapped Diagnostic Context) for `traceId` propagation. It promotes consistency and reduces redundancy across services.
 
----
+## Technology Stack
 
-## Project structure
+*   **Language:** Java 23+
+*   **Framework:** Spring Boot 3.x
+*   **Event Streaming:** Apache Kafka
+*   **Database:** PostgreSQL (for `template-service` and `delivery-tracker`)
+*   **Caching/Deduplication:** Redis
+*   **Distributed Scheduling:** ShedLock
+*   **API Documentation:** Swagger/OpenAPI
+*   **Build Tool:** Maven 3.8+
+*   **Containerization:** Docker & Docker Compose
 
-```
-notification-platform/
-├── notification-service/
-│   ├── domain/
-│   │   ├── event/          # NotificationEvent, EventType
-│   │   ├── channel/        # Channel, ChannelDispatcher port
-│   │   └── model/          # DeliveryStatus, RetryPolicy
-│   ├── application/
-│   │   ├── usecase/        # SendNotificationUseCase, RetryUseCase
-│   │   └── service/        # DeduplicationService, TemplateResolver
-│   ├── adapter/
-│   │   ├── kafka/          # KafkaConsumer, KafkaProducer (DLQ/retry)
-│   │   └── channels/
-│   │       ├── email/      # SendGridAdapter
-│   │       ├── sms/        # TwilioAdapter
-│   │       ├── push/       # FcmAdapter
-│   │       └── webhook/    # WebhookAdapter
-│   └── infrastructure/
-│       ├── redis/          # IdempotencyStore
-│       ├── postgres/       # DeliveryRepository
-│       └── shedlock/       # RetrySchedulerConfig
-├── template-service/
-│   ├── domain/
-│   ├── application/
-│   └── adapter/
-├── delivery-tracker/
-│   ├── domain/
-│   └── adapter/
-└── docker-compose.yml
-```
+## Local Development Setup
 
----
+### Prerequisites
 
-## Kafka event schema
+*   **Java 23** (or later)
+*   **Maven 3.8+**
+*   **Docker & Docker Compose**
+*   **PostgreSQL 16** (running locally, default port 5432)
+*   **Redis 7.2** (running locally, default port 6379)
 
-Every upstream service publishes events in this shape:
+### Local Services Setup
 
-```json
-{
-  "eventId":    "evt_01HXYZ9...",
-  "eventType":  "ORDER_PLACED",
-  "userId":     "usr_abc123",
-  "channels":   ["email", "push"],
-  "templateId": "order-confirm-v2",
-  "payload": {
-    "orderId": "ord_789",
-    "amount": 99.00
-  }
-}
-```
-
-`eventId` is the idempotency key. If the same `eventId` is consumed twice within 24 hours, the second delivery is silently dropped.
-
----
-
-## Retry and failure handling
-
-```
-Delivery attempt
-      │
-   success --> mark DELIVERED in tracker
-      │
-   failure
-      │
-   retry count < 3 --> publish to notification.retry (with backoff header)
-      │
-   retry count == 3 --> publish to notification.dlq
-      │
-   DLQ consumer --> alert + manual inspection dashboard (planned)
-```
-
-The retry scheduler runs every 30 seconds, protected by ShedLock against duplicate execution across instances.
-
----
-
-## Running locally
-
-**Prerequisites:** Java 23, Docker
+Ensure PostgreSQL and Redis are running locally. On macOS with Homebrew:
 
 ```bash
-git clone https://github.com/abhim8/notification-platform.git
-cd notification-platform
-docker-compose up -d        # starts Kafka, Redis, PostgreSQL
-./mvnw spring-boot:run -pl notification-service
+# Start PostgreSQL
+brew services start postgresql
+
+# Start Redis
+brew services start redis
+
+# Verify connections
+psql -U notif_user -d notification_db  # Should connect
+redis-cli ping                          # Should return "PONG"
 ```
 
-Environment variables required (copy `.env.example`):
+## Docker/Kafka Setup
 
-```
-SENDGRID_API_KEY=
-FCM_SERVER_KEY=
-REDIS_HOST=localhost
-POSTGRES_URL=jdbc:postgresql://localhost:5432/notifications
-```
+### Step 1: Start Kafka & Zookeeper
 
----
+From the project root:
 
-## API
+```bash
+# Start Kafka and Zookeeper (Docker Compose creates all 5 topics automatically)
+docker-compose up -d
 
-The notification service exposes a REST API for manual triggering and status checks:
-
-```
-POST /api/v1/notifications          # publish a notification event directly
-GET  /api/v1/notifications/{id}     # get delivery status
-GET  /api/v1/notifications/{id}/attempts  # get all delivery attempts per channel
+# Verify Kafka is running
+docker-compose logs kafka-init
+# Should see: "All topics created successfully!"
 ```
 
-Full OpenAPI spec available at `http://localhost:8080/swagger-ui.html` when running locally.
+## PostgreSQL Setup
 
----
+### Step 2: Initialize Database Schema
 
-## What I'd add with more time
+```bash
+# Connect to PostgreSQL and run init script
+psql -U notif_user -d notification_db -f init-db.sql
 
-- Admin dashboard for DLQ inspection and manual replay
-- Per-channel rate limiting (e.g. max 3 SMS/user/hour)
-- Priority queue support within transactional topic
-- Metrics via Micrometer + Grafana dashboard
+# Verify tables were created:
+psql -U notif_user -d notification_db -c "\dt"
+# Should see: delivery_attempts, shedlock, etc.
+```
 
----
+## Build Instructions
 
-## Blog post
+### Step 3: Build the Application
 
-[How I built a production-grade notification platform with Kafka](./BLOG.md) - covers the failure handling design, idempotency decisions, and lessons from the ShedLock + Redis setup.
+```bash
+# Compile all modules
+mvn clean compile
+
+# Optionally run tests
+mvn test
+
+# Build JARs
+mvn package
+```
+
+## Run Instructions
+
+### Step 4: Start All Three Services
+
+Each service runs in its own terminal from the project root:
+
+**Terminal 1 - Notification Service (port 8001):**
+```bash
+mvn spring-boot:run -pl notification-service
+```
+
+**Terminal 2 - Template Service (port 8002):**
+```bash
+mvn spring-boot:run -pl template-service
+```
+
+**Terminal 3 - Delivery Tracker (port 8003):**
+```bash
+mvn spring-boot:run -pl delivery-tracker
+```
+
+## API Documentation Links (Swagger)
+
+*   **notification-service**: `http://localhost:8001/swagger-ui.html`
+*   **template-service**: `http://localhost:8002/swagger-ui.html`
+*   **delivery-tracker**: `http://localhost:8003/swagger-ui.html`
+
+## Important Environment Variables
+
+All services support environment variable overrides for configuration. Here are some key ones:
+
+```bash
+# Notification Service
+export SERVER_PORT=8001
+export KAFKA_BOOTSTRAP_SERVERS=localhost:9092
+export DB_HOST=localhost:5432
+export REDIS_HOST=localhost
+export RETRY_SCHEDULER_INTERVAL_MS=30000
+export TEMPLATE_SERVICE_BASE_URL=http://localhost:8002
+export DELIVERY_TRACKER_BASE_URL=http://localhost:8003
+
+# Template Service
+export SERVER_PORT=8002
+export DB_HOST=localhost:5432
+
+# Delivery Tracker
+export SERVER_PORT=8003
+export DB_HOST=localhost:5432
+
+# Channel Configuration (Notification Service)
+export SENDGRID_API_KEY=your-key-here
+export SENDGRID_FROM_EMAIL=noreply@example.com
+export TWILIO_ACCOUNT_SID=your-sid
+export TWILIO_FROM_NUMBER=+1234567890
+export FIREBASE_ENABLED=true
+export FIREBASE_PROJECT_ID=your-project
+```
+
+## Overall Request Flow
+
+A notification request typically starts with a client sending a request to the `notification-service`. This service then orchestrates the entire process, including template resolution, channel-specific dispatch, and delivery attempt tracking, leveraging Kafka for resilience and asynchronous processing.
+
+## Notification Flow
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant NS as Notification Service
+    participant K as Kafka
+    participant TS as Template Service
+    participant CD as Channel Dispatcher
+    participant EX as External Channel (SendGrid/Twilio/FCM/Webhook)
+    participant DT as Delivery Tracker
+    participant R as Redis
+
+    Client->>NS: POST /notifications (CreateNotificationRequest)
+    NS->>R: Check for eventId in dedup cache
+    alt Event ID exists
+        R-->>NS: Event already processed (deduplicated)
+        NS-->>Client: 200 OK (deduplicated)
+    else Event ID new
+        R-->>NS: Event not in cache
+        NS->>R: Store eventId in dedup cache (24h TTL)
+        NS->>K: Publish NotificationEvent to `notification.transactional` topic
+        NS-->>Client: 202 Accepted
+        K->>NS: Consume NotificationEvent
+        NS->>TS: GET /templates/{templateId} (Template Resolution)
+        TS-->>NS: Template content
+        NS->>CD: Dispatch to Channels (Email, SMS, Push, Webhook)
+        CD->>EX: Send message via specific channel API
+        EX-->>CD: Delivery result (success/failure, messageId)
+        CD->>DT: POST /delivery-attempts (Record attempt)
+        DT-->>CD: 201 Created
+        CD-->>NS: Channel dispatch results
+        NS->>K: Publish SendNotificationResult (or retry topic if failed)
+    end
+```
+
+## Retry Flow
+
+```mermaid
+sequenceDiagram
+    participant NS_Consumer as Notification Service (Kafka Consumer)
+    participant NS_Scheduler as Notification Service (Retry Scheduler)
+    participant ShedLock
+    participant K as Kafka
+    participant DT as Delivery Tracker
+    participant CD as Channel Dispatcher
+    participant EX as External Channel
+
+    NS_Consumer->>DT: Identify failed attempts
+    NS_Consumer->>K: Publish failed event to `notification.retry` topic
+    K->>NS_Consumer: Consume failed event (for retry processing)
+    NS_Consumer->>NS_Scheduler: Request retry
+    NS_Scheduler->>ShedLock: Acquire lock for retry task
+    alt Lock Acquired
+        ShedLock-->>NS_Scheduler: Lock granted
+        NS_Scheduler->>CD: Re-dispatch notification for failed channels
+        CD->>EX: Send message
+        EX-->>CD: Delivery result
+        CD->>DT: POST /delivery-attempts (Update attempt)
+        DT-->>CD: 200 OK
+        CD-->>NS_Scheduler: Dispatch result
+        alt Success after retry
+            NS_Scheduler->>K: Publish success event (optional)
+        else Failure after retries exhausted
+            NS_Scheduler->>K: Publish to `notification.dlq` topic
+        end
+        NS_Scheduler->>ShedLock: Release lock
+    else Lock not acquired (another instance running)
+        ShedLock-->>NS_Scheduler: Lock denied
+        NS_Scheduler-->>NS_Consumer: Skip retry
+    end
+```
+
+## Template Resolution Flow
+
+```mermaid
+sequenceDiagram
+    participant NS as Notification Service
+    participant TS as Template Service
+    participant DB as PostgreSQL
+
+    NS->>TS: GET /api/v1/templates/{templateId}
+    TS->>DB: Query for template by ID
+    DB-->>TS: TemplateEntity
+    TS->>TS: Render template with payload
+    TS-->>NS: Rendered template content (HTML/text)
+```
+
+## Delivery Tracking Flow
+
+```mermaid
+sequenceDiagram
+    participant CD as Channel Dispatcher (in NS)
+    participant DT as Delivery Tracker
+    participant DB as PostgreSQL
+    participant Client
+
+    CD->>DT: POST /api/v1/delivery-attempts (CreateDeliveryAttemptRequest)
+    DT->>DB: Insert DeliveryAttemptEntity
+    DB-->>DT: Persisted entity
+    DT-->>CD: DeliveryAttemptResponse (201 Created)
+
+    Client->>DT: GET /api/v1/delivery-attempts/events/{eventId}
+    DT->>DB: Query DeliveryAttemptEntity by eventId
+    DB-->>DT: List<DeliveryAttemptEntity>
+    DT-->>Client: List<DeliveryAttemptResponse>
+
+    Client->>DT: GET /api/v1/delivery-attempts/users/{userId}
+    DT->>DB: Query DeliveryAttemptEntity by userId
+    DB-->>DT: List<DeliveryAttemptEntity>
+    DT-->>Client: List<DeliveryAttemptResponse>
+```
