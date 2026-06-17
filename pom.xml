@@ -77,6 +77,12 @@
                 <groupId>com.twilio.sdk</groupId>
                 <artifactId>twilio</artifactId>
                 <version>${twilio.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- Firebase Admin SDK -->
@@ -183,6 +189,12 @@
         <dependency>
             <groupId>com.twilio.sdk</groupId>
             <artifactId>twilio</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Firebase -->

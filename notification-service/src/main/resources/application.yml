@@ -49,8 +49,8 @@ spring:
 
 retry:
   scheduler:
-    interval-ms: ${RETRY_SCHEDULER_INTERVAL_MS:30000}
-    initial-delay-ms: ${RETRY_SCHEDULER_INITIAL_DELAY_MS:10000}
+    interval-ms: ${RETRY_SCHEDULER_INTERVAL_MS:60000}
+    initial-delay-ms: ${RETRY_SCHEDULER_INITIAL_DELAY_MS:30000}
 
 server:
   port: ${SERVER_PORT:8001}
@@ -95,11 +95,11 @@ idempotency:
   ttl-hours: ${IDEMPOTENCY_TTL_HOURS:24}
 
 template-service:
-  enabled: ${TEMPLATE_SERVICE_ENABLED:true}
+  enabled: ${TEMPLATE_SERVICE_ENABLED:false}
   base-url: ${TEMPLATE_SERVICE_URL:http://localhost:8002}
 
 delivery-tracker:
-  enabled: ${DELIVERY_TRACKER_ENABLED:true}
+  enabled: ${DELIVERY_TRACKER_ENABLED:false}
   base-url: ${DELIVERY_TRACKER_URL:http://localhost:8003}
 
 springdoc:

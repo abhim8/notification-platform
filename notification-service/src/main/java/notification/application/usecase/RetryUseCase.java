@@ -1,6 +1,8 @@
 package notification.application.usecase;
 
 import lombok.extern.slf4j.Slf4j;
+import notification.application.service.DeliveryAttemptRecorder;
+import notification.application.service.FailedDeliveryLoader;
 import notification.domain.channel.Channel;
 import notification.domain.model.DeliveryStatus;
 import notification.domain.model.RetryPolicy;
@@ -22,13 +24,13 @@ public class RetryUseCase {
     private final RetryPolicy retryPolicy;
     private final SendNotificationUseCase sendNotificationUseCase;
     private final FailedDeliveryLoader failedDeliveryLoader;
-    private final SendNotificationUseCase.DeliveryAttemptRecorder attemptRecorder;
+    private final DeliveryAttemptRecorder attemptRecorder;
 
     public RetryUseCase(
             RetryPolicy retryPolicy,
             SendNotificationUseCase sendNotificationUseCase,
             FailedDeliveryLoader failedDeliveryLoader,
-            SendNotificationUseCase.DeliveryAttemptRecorder attemptRecorder) {
+            DeliveryAttemptRecorder attemptRecorder) {
         this.retryPolicy = retryPolicy;
         this.sendNotificationUseCase = sendNotificationUseCase;
         this.failedDeliveryLoader = failedDeliveryLoader;
@@ -108,13 +110,6 @@ public class RetryUseCase {
      * Result of the retry execution
      */
     public record RetryResult(int retriedCount, int dlqCount) {}
-
-    /**
-     * Port for loading failed deliveries from persistence
-     */
-    public interface FailedDeliveryLoader {
-        java.util.List<FailedDelivery> loadFailedDeliveries();
-    }
 
     /**
      * Represents a failed delivery that can be retried

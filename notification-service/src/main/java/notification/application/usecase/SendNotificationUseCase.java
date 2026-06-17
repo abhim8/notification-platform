@@ -2,6 +2,7 @@ package notification.application.usecase;
 
 import lombok.extern.slf4j.Slf4j;
 import notification.application.service.DeduplicationService;
+import notification.application.service.DeliveryAttemptRecorder;
 import notification.application.service.TemplateResolver;
 import notification.domain.channel.Channel;
 import notification.domain.channel.ChannelDispatcher;
@@ -139,10 +140,4 @@ public class SendNotificationUseCase {
         return SendNotificationResult.success(event.eventId(), channelResults);
     }
 
-    /**
-     * Port for recording delivery attempts in the database
-     */
-    public interface DeliveryAttemptRecorder {
-        void recordAttempt(DeliveryAttemptCommand attempt);
-    }
 }

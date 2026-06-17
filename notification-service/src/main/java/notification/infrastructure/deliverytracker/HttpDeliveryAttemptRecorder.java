@@ -1,12 +1,12 @@
 package notification.infrastructure.deliverytracker;
 
 import lombok.extern.slf4j.Slf4j;
+import notification.application.service.DeliveryAttemptRecorder;
 import notification.application.usecase.DeliveryAttemptCommand;
-import notification.application.usecase.SendNotificationUseCase;
 import org.springframework.web.client.RestTemplate;
 
 @Slf4j
-public class HttpDeliveryAttemptRecorder implements SendNotificationUseCase.DeliveryAttemptRecorder {
+public class HttpDeliveryAttemptRecorder implements DeliveryAttemptRecorder {
 
     private final RestTemplate restTemplate;
     private final String baseUrl;

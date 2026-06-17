@@ -5,6 +5,7 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+      SERVER_JVMFLAGS: "-Xms128m -Xmx128m"
     ports:
       - "2181:2181"
     networks:
@@ -12,7 +13,7 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
-    mem_limit: 768m
+    mem_limit: 512m
     depends_on:
       - zookeeper
     ports:
@@ -26,13 +27,19 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_MIN_INSYNC_REPLICAS: 1
+      KAFKA_HEAP_OPTS: "-Xms256m -Xmx256m"
     networks:
       - notification-network
     healthcheck:
       test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "kafka:29092"]
-      interval: 5s
+      interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 20s
 
   kafka-init:
     image: confluentinc/cp-kafka:7.5.0
@@ -43,11 +50,11 @@ services:
     command: >
       bash -c "
       echo 'Creating Kafka topics...' &&
-      kafka-topics --create --if-not-exists --bootstrap-server kafka:29092 --topic notification.transactional --partitions 6 --replication-factor 1 --config retention.ms=604800000 &&
-      kafka-topics --create --if-not-exists --bootstrap-server kafka:29092 --topic notification.marketing --partitions 3 --replication-factor 1 --config retention.ms=259200000 &&
-      kafka-topics --create --if-not-exists --bootstrap-server kafka:29092 --topic notification.alerts --partitions 6 --replication-factor 1 --config retention.ms=86400000 &&
-      kafka-topics --create --if-not-exists --bootstrap-server kafka:29092 --topic notification.retry --partitions 3 --replication-factor 1 --config retention.ms=172800000 &&
-      kafka-topics --create --if-not-exists --bootstrap-server kafka:29092 --topic notification.dlq --partitions 3 --replication-factor 1 --config retention.ms=1209600000 &&
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:29092 --topic notification.transactional --partitions 1 --replication-factor 1 --config retention.ms=86400000 &&
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:29092 --topic notification.marketing --partitions 1 --replication-factor 1 --config retention.ms=86400000 &&
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:29092 --topic notification.alerts --partitions 1 --replication-factor 1 --config retention.ms=86400000 &&
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:29092 --topic notification.retry --partitions 1 --replication-factor 1 --config retention.ms=86400000 &&
+      kafka-topics --create --if-not-exists --bootstrap-server kafka:29092 --topic notification.dlq --partitions 1 --replication-factor 1 --config retention.ms=86400000 &&
       echo 'All topics created successfully!'
       "
     networks:
@@ -55,13 +62,15 @@ services:
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
-    mem_limit: 128m
+    mem_limit: 192m
     container_name: kafka-ui
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     ports:
       - "8080:8080"
     environment:
+      JAVA_OPTS: "-Xms64m -Xmx128m"
       DYNAMIC_CONFIG_ENABLED: "true"
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092

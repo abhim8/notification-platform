@@ -1,6 +1,7 @@
 package notification.infrastructure.deliverytracker;
 
 import lombok.extern.slf4j.Slf4j;
+import notification.application.service.FailedDeliveryLoader;
 import notification.application.usecase.RetryUseCase;
 import notification.domain.channel.Channel;
 import org.springframework.core.ParameterizedTypeReference;
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
-public class HttpFailedDeliveryLoader implements RetryUseCase.FailedDeliveryLoader {
+public class HttpFailedDeliveryLoader implements FailedDeliveryLoader {
 
     private final RestTemplate restTemplate;
     private final String baseUrl;

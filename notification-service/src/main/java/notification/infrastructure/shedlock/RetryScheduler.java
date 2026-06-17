@@ -24,14 +24,14 @@ public class RetryScheduler {
     }
 
     /**
-     * Retry scheduler - runs every 30 seconds
+     * Retry scheduler - runs every 60 seconds
      * Protected by ShedLock for distributed deployment
      */
     @Scheduled(fixedDelayString = "${retry.scheduler.interval-ms:30000}", initialDelayString = "${retry.scheduler.initial-delay-ms:10000}")
     @SchedulerLock(
             name = "notification-retry-scheduler",
-            lockAtMostFor = "30s",
-            lockAtLeastFor = "5s"
+            lockAtMostFor = "2m",
+            lockAtLeastFor = "30s"
     )
     public void retryFailedNotifications() {
         try {

@@ -17,21 +17,18 @@ public class MockTemplateResolver implements TemplateResolver {
 
     @Override
     public String resolveTemplate(String templateId, Map<String, Object> payload) {
+        log.debug("[TEMPLATE] Resolving template: templateId={}", templateId);
+
+        String template = getTemplate(templateId);
+        if (template == null) {
+            log.warn("[TEMPLATE] Template not found: templateId={}", templateId);
+            throw new TemplateResolutionException("Template not found: " + templateId);
+        }
         try {
-            log.debug("[TEMPLATE] Resolving template: templateId={}", templateId);
-
-            // Mock template resolution
-            // In production, this would:
-            // 1. Call template-service REST API
-            // 2. Fetch template by ID
-            // 3. Render with payload
-
-            String template = getTemplate(templateId);
             return renderTemplate(template, payload);
-
         } catch (Exception e) {
-            log.error("[ERROR] Failed to resolve template: templateId={}", templateId, e);
-            throw new TemplateResolutionException("Failed to resolve template: " + templateId, e);
+            log.error("[ERROR] Failed to render template: templateId={}", templateId, e);
+            throw new TemplateResolutionException("Failed to render template: " + templateId, e);
         }
     }
 
@@ -59,14 +56,7 @@ public class MockTemplateResolver implements TemplateResolver {
         };
     }
 
-    /**
-     * Render template with payload (simple replacement)
-     */
     private String renderTemplate(String template, Map<String, Object> payload) {
-        if (template == null) {
-            throw new TemplateResolutionException("Template not found");
-        }
-
         String result = template;
         for (Map.Entry<String, Object> entry : payload.entrySet()) {
             String placeholder = "{{" + entry.getKey() + "}}";
