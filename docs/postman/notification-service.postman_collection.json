@@ -17,14 +17,14 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"eventId\": \"evt-001-20250101\",\n  \"eventType\": \"TRANSACTIONAL\",\n  \"userId\": \"usr-42\",\n  \"channels\": [\"email\", \"sms\"],\n  \"templateId\": \"tpl-welcome\",\n  \"payload\": {\n    \"userName\": \"Alice\",\n    \"accountId\": \"ACC-12345\",\n    \"amount\": 250.00\n  }\n}"
+          "raw": "{\n  \"eventId\": \"evt-001-20260617\",\n  \"eventType\": \"ORDER_PLACED\",\n  \"userId\": \"usr-123\",\n  \"channels\": [\"EMAIL\", \"SMS\"],\n  \"templateId\": \"order-confirm\",\n  \"payload\": {\n    \"orderId\": \"ord-789\",\n    \"amount\": 99.99,\n    \"email_recipient\": \"user@example.com\",\n    \"sms_recipient\": \"+1234567890\"\n  }\n}"
         },
         "url": {
           "raw": "{{notification_service_url}}/api/v1/notifications",
           "host": ["{{notification_service_url}}"],
           "path": ["api", "v1", "notifications"]
         },
-        "description": "Sends a notification to specified channels. Bypasses Kafka and dispatches synchronously.\n\nRequired fields: eventId, eventType, userId, channels (non-empty), templateId.\n\nResponse (200):\n```json\n{\n  \"eventId\": \"evt-001-20250101\",\n  \"success\": true,\n  \"status\": \"success\",\n  \"message\": \"Notification sent to 2 channels\",\n  \"channelResults\": {\n    \"email\": {\n      \"success\": true,\n      \"messageId\": \"msg-abc-123\",\n      \"errorMessage\": null\n    },\n    \"sms\": {\n      \"success\": false,\n      \"messageId\": null,\n      \"errorMessage\": \"Provider unavailable\"\n    }\n  }\n}\n```"
+        "description": "Sends a notification to specified channels. Dispatches synchronously using the channel adapters.\n\nRequired fields: eventId, eventType, userId, channels (non-empty array), templateId.\nOptional: payload (map of data for template rendering).\n\nValid EventTypes: ORDER_PLACED, ORDER_SHIPPED, ORDER_DELIVERED, PAYMENT_FAILED, PASSWORD_RESET, ACCOUNT_CREATED, USER_INVITED, PROMOTION_ALERT, FRAUD_ALERT, SYSTEM_ALERT\n\nValid Channels: EMAIL, SMS, PUSH, WEBHOOK\n\nResponse (200):\n```json\n{\n  \"eventId\": \"evt-001-20260617\",\n  \"success\": true,\n  \"status\": \"success\",\n  \"message\": \"Notification sent successfully\",\n  \"channelResults\": {\n    \"EMAIL\": {\n      \"success\": true,\n      \"messageId\": \"sendgrid_mock_evt-001-20260617_email\",\n      \"errorMessage\": null\n    },\n    \"SMS\": {\n      \"success\": true,\n      \"messageId\": \"twilio_mock_evt-001-20260617_sms\",\n      \"errorMessage\": null\n    }\n  }\n}\n```"
       },
       "response": []
     },
@@ -40,12 +40,12 @@
           "variable": [
             {
               "key": "eventId",
-              "value": "evt-001-20250101",
+              "value": "evt-001-20260617",
               "description": "The unique event identifier"
             }
           ]
         },
-        "description": "Retrieves the overall delivery status for a notification event.\n\nCurrently returns a placeholder response. For detailed per-channel status, query the delivery-tracker service directly.\n\nResponse (200):\n```json\n{\n  \"eventId\": \"evt-001-20250101\",\n  \"overallStatus\": \"UNKNOWN\",\n  \"message\": \"Event has been processed. Query delivery-tracker service for detailed status.\"\n}\n```"
+        "description": "Retrieves the high-level delivery status for a notification event.\n\nFor detailed per-channel delivery attempts, query the delivery-tracker service directly using the eventId.\n\nResponse (200):\n```json\n{\n  \"eventId\": \"evt-001-20260617\",\n  \"status\": \"DELIVERED\",\n  \"message\": \"Event has been processed. Query delivery-tracker service for detailed per-channel status.\"\n}\n```"
       },
       "response": []
     },
@@ -61,12 +61,12 @@
           "variable": [
             {
               "key": "eventId",
-              "value": "evt-001-20250101",
+              "value": "evt-001-20260617",
               "description": "The unique event identifier"
             }
           ]
         },
-        "description": "Returns a placeholder message with instructions to query the delivery-tracker service directly.\n\nResponse (200):\n```json\n{\n  \"eventId\": \"evt-001-20250101\",\n  \"message\": \"Query delivery-tracker service at http://localhost:8003/api/v1/delivery-attempts/events/evt-001-20250101\"\n}\n```"
+        "description": "Gets a link to query delivery attempts from the delivery-tracker service.\n\nResponse (200):\n```json\n{\n  \"eventId\": \"evt-001-20260617\",\n  \"message\": \"Query delivery-tracker service at http://localhost:8003/api/v1/delivery-attempts/events/evt-001-20260617\",\n  \"url\": \"http://localhost:8003/api/v1/delivery-attempts/events/evt-001-20260617\"\n}\n```"
       },
       "response": []
     }
@@ -79,8 +79,9 @@
     },
     {
       "key": "eventId",
-      "value": "evt-001-20250101",
-      "type": "string"
+      "value": "evt-001-20260617",
+      "type": "string",
+      "description": "Unique event identifier for the notification"
     }
   ]
 }

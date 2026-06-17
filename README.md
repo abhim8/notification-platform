@@ -84,8 +84,8 @@ brew services start postgresql
 brew services start redis
 
 # Verify connections
-psql -U notif_user -d notification_db  # Should connect
-redis-cli ping                          # Should return "PONG"
+psql -U notif_user -d notification  # Should connect
+redis-cli ping                     # Should return "PONG"
 ```
 
 ## Docker/Kafka Setup
@@ -103,17 +103,16 @@ docker-compose logs kafka-init
 # Should see: "All topics created successfully!"
 ```
 
-## PostgreSQL Setup
+## Database Schema
 
-### Step 2: Initialize Database Schema
+### Step 2: Database Initialization
+
+The database schema (notification_schema) must be created manually before starting the services. Once the schema exists, Liquibase automatically manages all subsequent database initialization and migrations using each service's db-changelog-master.yaml during application startup.
 
 ```bash
-# Connect to PostgreSQL and run init script
-psql -U notif_user -d notification_db -f init-db.sql
-
-# Verify tables were created:
-psql -U notif_user -d notification_db -c "\dt"
-# Should see: delivery_attempts, shedlock, etc.
+# After starting services, verify tables were created:
+psql -U notif_user -d notification -c "\dt notification_schema.*"
+# Should see: delivery_attempts, templates, shedlock, etc.
 ```
 
 ## Build Instructions
@@ -166,27 +165,39 @@ All services support environment variable overrides for configuration. Here are 
 # Notification Service
 export SERVER_PORT=8001
 export KAFKA_BOOTSTRAP_SERVERS=localhost:9092
-export DB_HOST=localhost:5432
+export DB_HOST=jdbc:postgresql://localhost:5432/notification?currentSchema=notification_schema
+export DB_USER=user
+export DB_PASSWORD=""
 export REDIS_HOST=localhost
-export RETRY_SCHEDULER_INTERVAL_MS=30000
-export TEMPLATE_SERVICE_BASE_URL=http://localhost:8002
-export DELIVERY_TRACKER_BASE_URL=http://localhost:8003
+export REDIS_PORT=6379
+export RETRY_SCHEDULER_INTERVAL_MS=60000
+export RETRY_SCHEDULER_INITIAL_DELAY_MS=30000
+export TEMPLATE_SERVICE_URL=http://localhost:8002
+export DELIVERY_TRACKER_URL=http://localhost:8003
 
 # Template Service
-export SERVER_PORT=8002
-export DB_HOST=localhost:5432
+export TEMPLATE_SERVICE_PORT=8002
+export DB_HOST=jdbc:postgresql://localhost:5432/notification?currentSchema=notification_schema
+export DB_USER=user
+export DB_PASSWORD=""
 
 # Delivery Tracker
-export SERVER_PORT=8003
-export DB_HOST=localhost:5432
+export DELIVERY_TRACKER_PORT=8003
+export DB_HOST=jdbc:postgresql://localhost:5432/notification?currentSchema=notification_schema
+export DB_USER=user
+export DB_PASSWORD=""
 
-# Channel Configuration (Notification Service)
+# Channel Configuration (Notification Service - defaults shown, update for real credentials)
 export SENDGRID_API_KEY=your-key-here
-export SENDGRID_FROM_EMAIL=noreply@example.com
+export SENDGRID_FROM_EMAIL=noreply@notification-platform.com
 export TWILIO_ACCOUNT_SID=your-sid
+export TWILIO_AUTH_TOKEN=your-token
 export TWILIO_FROM_NUMBER=+1234567890
-export FIREBASE_ENABLED=true
+export FIREBASE_ENABLED=false
 export FIREBASE_PROJECT_ID=your-project
+export WEBHOOK_TIMEOUT_MS=5000
+export WEBHOOK_MAX_RETRIES=1
+export IDEMPOTENCY_TTL_HOURS=24
 ```
 
 ## Overall Request Flow

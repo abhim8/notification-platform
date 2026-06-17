@@ -17,12 +17,12 @@
           "variable": [
             {
               "key": "eventId",
-              "value": "evt-001-20250101",
+              "value": "evt-001-20260617",
               "description": "The unique event identifier"
             }
           ]
         },
-        "description": "Retrieves all delivery attempts for a specific event.\n\nResponse (200):\n```json\n[\n  {\n    \"id\": 1,\n    \"eventId\": \"evt-001-20250101\",\n    \"userId\": \"usr-42\",\n    \"eventType\": \"TRANSACTIONAL\",\n    \"channel\": \"email\",\n    \"status\": \"DELIVERED\",\n    \"attemptNumber\": 1,\n    \"messageId\": \"msg-abc-123\",\n    \"errorMessage\": null,\n    \"createdAt\": \"2025-01-01T10:00:00\",\n    \"updatedAt\": \"2025-01-01T10:00:05\"\n  }\n]\n```\n\nResponse (404): No attempts found for the given event."
+        "description": "Retrieves all delivery attempts for a specific event.\n\nResponse (200):\n```json\n[\n  {\n    \"id\": 1,\n    \"eventId\": \"evt-001-20250101\",\n    \"userId\": \"usr-42\",\n    \"eventType\": \"ORDER_PLACED\",\n    \"channel\": \"EMAIL\",\n    \"status\": \"DELIVERED\",\n    \"attemptNumber\": 1,\n    \"messageId\": \"msg-abc-123\",\n    \"errorMessage\": null,\n    \"createdAt\": \"2026-06-17T10:00:00\",\n    \"updatedAt\": \"2026-06-17T10:00:05\"\n  }\n]\n```\n\nResponse (404): No attempts found for the given event."
       },
       "response": []
     },
@@ -38,17 +38,17 @@
           "variable": [
             {
               "key": "eventId",
-              "value": "evt-001-20250101",
+              "value": "evt-001-20260617",
               "description": "The unique event identifier"
             },
             {
               "key": "channel",
-              "value": "email",
-              "description": "Delivery channel (email, sms, push, webhook)"
+              "value": "EMAIL",
+              "description": "Delivery channel (EMAIL, SMS, PUSH, WEBHOOK)"
             }
           ]
         },
-        "description": "Retrieves all delivery attempts for a specific event and channel.\n\nResponse (200):\n```json\n[\n  {\n    \"id\": 1,\n    \"eventId\": \"evt-001-20250101\",\n    \"userId\": \"usr-42\",\n    \"eventType\": \"TRANSACTIONAL\",\n    \"channel\": \"email\",\n    \"status\": \"DELIVERED\",\n    \"attemptNumber\": 1,\n    \"messageId\": \"msg-abc-123\",\n    \"errorMessage\": null,\n    \"createdAt\": \"2025-01-01T10:00:00\",\n    \"updatedAt\": \"2025-01-01T10:00:05\"\n  }\n]\n```\n\nResponse (404): No attempts found."
+        "description": "Retrieves all delivery attempts for a specific event and channel.\n\nResponse (200):\n```json\n[\n  {\n    \"id\": 1,\n    \"eventId\": \"evt-001-20250101\",\n    \"userId\": \"usr-42\",\n    \"eventType\": \"ORDER_PLACED\",\n    \"channel\": \"EMAIL\",\n    \"status\": \"DELIVERED\",\n    \"attemptNumber\": 1,\n    \"messageId\": \"msg-abc-123\",\n    \"errorMessage\": null,\n    \"createdAt\": \"2026-06-17T10:00:00\",\n    \"updatedAt\": \"2026-06-17T10:00:05\"\n  }\n]\n```\n\nResponse (404): No attempts found."
       },
       "response": []
     },
@@ -69,7 +69,7 @@
             }
           ]
         },
-        "description": "Retrieves a single delivery attempt by its ID.\n\nResponse (200):\n```json\n{\n  \"id\": 1,\n  \"eventId\": \"evt-001-20250101\",\n  \"userId\": \"usr-42\",\n  \"eventType\": \"TRANSACTIONAL\",\n  \"channel\": \"email\",\n  \"status\": \"DELIVERED\",\n  \"attemptNumber\": 1,\n  \"messageId\": \"msg-abc-123\",\n  \"errorMessage\": null,\n  \"createdAt\": \"2025-01-01T10:00:00\",\n  \"updatedAt\": \"2025-01-01T10:00:05\"\n}\n```\n\nResponse (404): Attempt not found."
+        "description": "Retrieves a single delivery attempt by its ID.\n\nResponse (200):\n```json\n{\n  \"id\": 1,\n  \"eventId\": \"evt-001-20250101\",\n  \"userId\": \"usr-42\",\n  \"eventType\": \"ORDER_PLACED\",\n  \"channel\": \"email\",\n  \"status\": \"DELIVERED\",\n  \"attemptNumber\": 1,\n  \"messageId\": \"msg-abc-123\",\n  \"errorMessage\": null,\n  \"createdAt\": \"2026-06-17T10:00:00\",\n  \"updatedAt\": \"2026-06-17T10:00:05\"\n}\n```\n\nResponse (404): Attempt not found."
       },
       "response": []
     },
@@ -90,7 +90,7 @@
             }
           ]
         },
-        "description": "Retrieves all delivery attempts for a specific user within the last 30 days.\n\nResponse (200):\n```json\n[\n  {\n    \"id\": 1,\n    \"eventId\": \"evt-001-20250101\",\n    \"userId\": \"usr-42\",\n    \"eventType\": \"TRANSACTIONAL\",\n    \"channel\": \"email\",\n    \"status\": \"DELIVERED\",\n    \"attemptNumber\": 1,\n    \"messageId\": \"msg-abc-123\",\n    \"errorMessage\": null,\n    \"createdAt\": \"2025-01-01T10:00:00\",\n    \"updatedAt\": \"2025-01-01T10:00:05\"\n  }\n]\n```\n\nResponse (404): No attempts found for the user."
+        "description": "Retrieves all delivery attempts for a specific user within the last 30 days.\n\nResponse (200):\n```json\n[\n  {\n    \"id\": 1,\n    \"eventId\": \"evt-001-20250101\",\n    \"userId\": \"usr-42\",\n    \"eventType\": \"ORDER_PLACED\",\n    \"channel\": \"EMAIL\",\n    \"status\": \"DELIVERED\",\n    \"attemptNumber\": 1,\n    \"messageId\": \"msg-abc-123\",\n    \"errorMessage\": null,\n    \"createdAt\": \"2026-06-17T10:00:00\",\n    \"updatedAt\": \"2026-06-17T10:00:05\"\n  }\n]\n```\n\nResponse (404): No attempts found for the user."
       },
       "response": []
     },
@@ -106,14 +106,14 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"eventId\": \"evt-001-20250101\",\n  \"userId\": \"usr-42\",\n  \"eventType\": \"TRANSACTIONAL\",\n  \"channel\": \"email\",\n  \"status\": \"DELIVERED\",\n  \"attemptNumber\": 1,\n  \"messageId\": \"msg-abc-123\",\n  \"errorMessage\": null\n}"
+          "raw": "{\n  \"eventId\": \"evt-001-20260617\",\n  \"userId\": \"usr-123\",\n  \"eventType\": \"ORDER_PLACED\",\n  \"channel\": \"EMAIL\",\n  \"status\": \"DELIVERED\",\n  \"attemptNumber\": 1,\n  \"messageId\": \"sendgrid_mock_evt-001-20260617_email\",\n  \"errorMessage\": null\n}"
         },
         "url": {
           "raw": "{{delivery_tracker_url}}/api/v1/delivery-attempts",
           "host": ["{{delivery_tracker_url}}"],
           "path": ["api", "v1", "delivery-attempts"]
         },
-        "description": "Records a delivery attempt for a notification event.\n\nResponse (201):\n```json\n{\n  \"id\": 1,\n  \"eventId\": \"evt-001-20250101\",\n  \"userId\": \"usr-42\",\n  \"eventType\": \"TRANSACTIONAL\",\n  \"channel\": \"email\",\n  \"status\": \"DELIVERED\",\n  \"attemptNumber\": 1,\n  \"messageId\": \"msg-abc-123\",\n  \"errorMessage\": null,\n  \"createdAt\": \"2025-01-01T10:00:00\",\n  \"updatedAt\": \"2025-01-01T10:00:00\"\n}\n```\n\nResponse (400): Invalid request body."
+        "description": "Records a delivery attempt for a notification event.\n\nResponse (201 Created):\n```json\n{\n  \"id\": 1,\n  \"eventId\": \"evt-001-20260617\",\n  \"userId\": \"usr-123\",\n  \"eventType\": \"ORDER_PLACED\",\n  \"channel\": \"EMAIL\",\n  \"status\": \"DELIVERED\",\n  \"attemptNumber\": 1,\n  \"messageId\": \"sendgrid_mock_evt-001-20260617_email\",\n  \"errorMessage\": null,\n  \"createdAt\": \"2026-06-17T10:00:00\",\n  \"updatedAt\": \"2026-06-17T10:00:00\"\n}\n```\n\nResponse (400): Invalid request body."
       },
       "response": []
     },
@@ -123,13 +123,13 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{delivery_tracker_url}}/api/v1/delivery-attempts/failed?since=2025-06-01T00:00:00&limit=100",
+          "raw": "{{delivery_tracker_url}}/api/v1/delivery-attempts/failed?since=2026-06-16T00:00:00Z&limit=100",
           "host": ["{{delivery_tracker_url}}"],
           "path": ["api", "v1", "delivery-attempts", "failed"],
           "query": [
             {
               "key": "since",
-              "value": "2025-06-01T00:00:00",
+              "value": "2026-06-16T00:00:00Z",
               "description": "ISO-8601 timestamp — only attempts updated after this time are returned. Defaults to 24 hours ago."
             },
             {
@@ -139,7 +139,7 @@
             }
           ]
         },
-        "description": "Retrieves failed delivery attempts for retry processing, ordered by oldest update first.\n\nResponse (200):\n```json\n[\n  {\n    \"id\": 2,\n    \"eventId\": \"evt-002-20250101\",\n    \"userId\": \"usr-99\",\n    \"eventType\": \"TRANSACTIONAL\",\n    \"channel\": \"sms\",\n    \"status\": \"FAILED\",\n    \"attemptNumber\": 1,\n    \"messageId\": null,\n    \"errorMessage\": \"Provider unavailable\",\n    \"createdAt\": \"2025-01-01T11:00:00\",\n    \"updatedAt\": \"2025-01-01T11:00:03\"\n  }\n]\n```"
+        "description": "Retrieves failed delivery attempts for retry processing, ordered by oldest update first.\n\nResponse (200):\n```json\n[\n  {\n    \"id\": 2,\n    \"eventId\": \"evt-002-20250101\",\n    \"userId\": \"usr-99\",\n    \"eventType\": \"ORDER_PLACED\",\n    \"channel\": \"SMS\",\n    \"status\": \"FAILED\",\n    \"attemptNumber\": 1,\n    \"messageId\": null,\n    \"errorMessage\": \"Provider unavailable\",\n    \"createdAt\": \"2026-06-17T11:00:00\",\n    \"updatedAt\": \"2026-06-17T11:00:03\"\n  }\n]\n```"
       },
       "response": []
     }
@@ -152,23 +152,27 @@
     },
     {
       "key": "eventId",
-      "value": "evt-001-20250101",
-      "type": "string"
+      "value": "evt-001-20260617",
+      "type": "string",
+      "description": "Unique event identifier"
     },
     {
       "key": "channel",
-      "value": "email",
-      "type": "string"
+      "value": "EMAIL",
+      "type": "string",
+      "description": "Delivery channel - valid values: EMAIL, SMS, PUSH, WEBHOOK"
     },
     {
       "key": "attemptId",
       "value": "1",
-      "type": "string"
+      "type": "string",
+      "description": "Attempt ID (numeric)"
     },
     {
       "key": "userId",
-      "value": "usr-42",
-      "type": "string"
+      "value": "usr-123",
+      "type": "string",
+      "description": "User ID"
     }
   ]
 }

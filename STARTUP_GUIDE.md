@@ -53,8 +53,8 @@ brew services start postgresql
 brew services start redis
 
 # Verify connections:
-psql -U notif_user -d notification_db  # Should connect
-redis-cli ping                          # Should return "PONG"
+psql -U notif_user -d notification  # Should connect
+redis-cli ping                     # Should return "PONG"
 ```
 
 ---
@@ -64,8 +64,6 @@ redis-cli ping                          # Should return "PONG"
 ### Step 1: Start Kafka & Zookeeper
 
 ```bash
-cd /Users/abhilash/IdeaProjects/notification-platform
-
 # Start Kafka and Zookeeper (Docker Compose creates all 5 topics automatically)
 docker-compose up -d
 
@@ -76,13 +74,12 @@ docker-compose logs kafka-init
 
 ### Step 2: Initialize Database Schema
 
-```bash
-# Connect to PostgreSQL and run init script
-psql -U notif_user -d notification_db -f init-db.sql
+The database schema (notification_schema) must be created manually before starting the services. Once the schema exists, Liquibase automatically manages all subsequent database initialization and migrations using each service's db-changelog-master.yaml during application startup.
 
-# Verify tables were created:
-psql -U notif_user -d notification_db -c "\dt"
-# Should see: delivery_attempts, shedlock, etc.
+```bash
+# Verify tables were created after starting services:
+psql -U abhilash -d notification -c "\dt notification_schema.*"
+# Should see: delivery_attempts, templates, shedlock, etc.
 ```
 
 ### Step 3: Build the Application
@@ -104,19 +101,16 @@ Each service runs in its own terminal:
 
 **Terminal 1 - Notification Service (port 8001):**
 ```bash
-cd /Users/abhilash/IdeaProjects/notification-platform
 mvn spring-boot:run -pl notification-service
 ```
 
 **Terminal 2 - Template Service (port 8002):**
 ```bash
-cd /Users/abhilash/IdeaProjects/notification-platform
 mvn spring-boot:run -pl template-service
 ```
 
 **Terminal 3 - Delivery Tracker (port 8003):**
 ```bash
-cd /Users/abhilash/IdeaProjects/notification-platform
 mvn spring-boot:run -pl delivery-tracker
 ```
 
@@ -206,11 +200,11 @@ curl -X POST http://localhost:8002/api/v1/templates/order-confirm/render \
 
 | Topic | Partitions | Retention | Consumer Group |
 |-------|-----------|-----------|---|
-| notification.transactional | 6 | 7 days | notif-svc-trans |
-| notification.marketing | 3 | 3 days | notif-svc-mktg |
-| notification.alerts | 6 | 1 day | notif-svc-alerts |
-| notification.retry | 3 | 2 days | (retry logic) |
-| notification.dlq | 3 | 14 days | (monitoring) |
+| notification.transactional | 1 | 24 hours | notif-svc-trans |
+| notification.marketing | 1 | 24 hours | notif-svc-mktg |
+| notification.alerts | 1 | 24 hours | notif-svc-alerts |
+| notification.retry | 1 | 24 hours | (retry logic) |
+| notification.dlq | 1 | 24 hours | (monitoring) |
 
 ### Monitor Kafka Topics
 
@@ -244,11 +238,11 @@ docker-compose exec kafka kafka-topics --describe \
 
 - **Max Retries**: 3 attempts
 - **Backoff Schedule**:
-  - Retry 1: 1 second after failure
-  - Retry 2: 5 seconds after failure
-  - Retry 3: 30 seconds after failure
+    - Retry 1: 1 second after failure
+    - Retry 2: 5 seconds after failure
+    - Retry 3: 30 seconds after failure
 - **After Exhaustion**: Event published to DLQ topic for monitoring
-- **Scheduler**: Runs every 30 seconds, protected by ShedLock for distributed deployments
+- **Scheduler**: Runs every 60 seconds (configurable via `RETRY_SCHEDULER_INTERVAL_MS`), protected by ShedLock for distributed deployments
 
 ---
 
@@ -428,23 +422,23 @@ mvn clean
 ## Next Steps
 
 1. **Add Real Channel Implementations**
-   - Replace mock SendGrid/Twilio/Firebase calls with actual API calls
-   - Update to call real template-service instead of MockTemplateResolver
+    - Replace mock SendGrid/Twilio/Firebase calls with actual API calls
+    - Update to call real template-service instead of MockTemplateResolver
 
 2. **Implement Delivery Status Tracking**
-   - Create EventStore to track overall notification status
-   - Add dashboard to visualize delivery metrics
+    - Create EventStore to track overall notification status
+    - Add dashboard to visualize delivery metrics
 
 3. **Add Monitoring & Alerts**
-   - Set up Prometheus metrics
-   - Create Grafana dashboards
-   - Configure alerting for failures
+    - Set up Prometheus metrics
+    - Create Grafana dashboards
+    - Configure alerting for failures
 
 4. **Production Deployment**
-   - Move to Kubernetes
-   - Add distributed tracing (Jaeger)
-   - Implement distributed Circuit Breaker (Resilience4j)
-   - Add data encryption
+    - Move to Kubernetes
+    - Add distributed tracing (Jaeger)
+    - Implement distributed Circuit Breaker (Resilience4j)
+    - Add data encryption
 
 ---
 

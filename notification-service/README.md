@@ -32,10 +32,10 @@ The service interacts with Kafka for event processing and inter-service communic
 
 | Topic                      | Consumer Group  | Purpose                                   | Partitions | Retention |
 | :------------------------- | :-------------- | :---------------------------------------- | :--------- | :-------- |
-| `notification.transactional` | `notif-svc-trans` | High-priority transactional notifications | 6          | 7 days    |
-| `notification.marketing`     | `notif-svc-mktg`  | Marketing-related notifications           | 3          | 3 days    |
-| `notification.alerts`        | `notif-svc-alerts`| Urgent alerts and critical notifications  | 6          | 1 day     |
-| `notification.retry`         | `notif-svc-retry` | Internal topic for failed events awaiting retry | 3          | 2 days    |
+| `notification.transactional` | `notif-svc-trans` | High-priority transactional notifications | 1          | 24 hours  |
+| `notification.marketing`     | `notif-svc-mktg`  | Marketing-related notifications           | 1          | 24 hours  |
+| `notification.alerts`        | `notif-svc-alerts`| Urgent alerts and critical notifications  | 1          | 24 hours  |
+| `notification.retry`         | `notif-svc-retry` | Internal topic for failed events awaiting retry | 1          | 24 hours  |
 
 ### Produced Topics
 
@@ -56,8 +56,8 @@ The service includes a distributed retry scheduler powered by [ShedLock](https:/
 *   **Mechanism:** Periodically queries the `delivery-tracker` service for failed delivery attempts.
 *   **Locking:** Uses ShedLock with PostgreSQL as the lock provider to ensure that only one instance of the `notification-service` runs the retry task in a clustered environment.
 *   **Configuration:**
-    *   `retry.scheduler.interval-ms`: Frequency of the scheduler run (default: 60000ms/1 minute).
-    *   `retry.scheduler.initial-delay-ms`: Initial delay before the first run (default: 30000ms).
+    *   `retry.scheduler.interval-ms`: Frequency of the scheduler run (default: 60000ms, configurable via `RETRY_SCHEDULER_INTERVAL_MS`).
+    *   `retry.scheduler.initial-delay-ms`: Initial delay before the first run (default: 30000ms, configurable via `RETRY_SCHEDULER_INITIAL_DELAY_MS`).
 *   **Retry Policy:**
     *   **Max Retries:** 3 attempts
     *   **Backoff Schedule**: Configured for exponential backoff (1s, 5s, 30s after failure, before being published to DLQ)
