@@ -1,6 +1,8 @@
 package delivery.adapter.postgres.repository;
 
 import delivery.adapter.postgres.entity.DeliveryAttemptEntity;
+import delivery.domain.channel.Channel;
+import delivery.domain.model.DeliveryStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -22,7 +24,7 @@ public interface DeliveryAttemptEntityRepository extends JpaRepository<DeliveryA
     /**
      * Find all attempts for a specific event and channel
      */
-    List<DeliveryAttemptEntity> findByEventIdAndChannel(String eventId, String channel);
+    List<DeliveryAttemptEntity> findByEventIdAndChannel(String eventId, Channel channel);
 
     /**
      * Find attempts by event ID and user ID
@@ -37,17 +39,16 @@ public interface DeliveryAttemptEntityRepository extends JpaRepository<DeliveryA
     /**
      * Find attempts with given status
      */
-    List<DeliveryAttemptEntity> findByStatus(String status);
+    List<DeliveryAttemptEntity> findByStatus(DeliveryStatus status);
 
     /**
      * Find failed attempts for retry, ordered by recency
      */
     List<DeliveryAttemptEntity> findByStatusAndUpdatedAtAfterOrderByUpdatedAtAsc(
-            String status, LocalDateTime since, Pageable pageable);
+            DeliveryStatus status, LocalDateTime since, Pageable pageable);
 
     /**
      * Count attempts by event ID and channel
      */
-    int countByEventIdAndChannel(String eventId, String channel);
+    int countByEventIdAndChannel(String eventId, Channel channel);
 }
-

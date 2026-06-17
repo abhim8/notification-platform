@@ -1,5 +1,8 @@
 package delivery.adapter.postgres.entity;
 
+import delivery.domain.channel.Channel;
+import delivery.domain.event.EventType;
+import delivery.domain.model.DeliveryStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,14 +35,17 @@ public class DeliveryAttemptEntity {
     @Column(name = "user_id", nullable = false, length = 64)
     private String userId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "event_type", nullable = false, length = 100)
-    private String eventType;
+    private EventType eventType;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "channel", nullable = false, length = 20)
-    private String channel;
+    private Channel channel;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
-    private String status;
+    private DeliveryStatus status;
 
     @Column(name = "attempt_number", nullable = false)
     private Integer attemptNumber;
@@ -58,8 +64,8 @@ public class DeliveryAttemptEntity {
 
     public DeliveryAttemptEntity() {}
 
-    public DeliveryAttemptEntity(String eventId, String userId, String eventType, String channel,
-                                String status, Integer attemptNumber) {
+    public DeliveryAttemptEntity(String eventId, String userId, EventType eventType, Channel channel,
+                                DeliveryStatus status, Integer attemptNumber) {
         this.eventId = eventId;
         this.userId = userId;
         this.eventType = eventType;

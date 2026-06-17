@@ -1,5 +1,9 @@
 package notification.adapter.rest.dto;
 
+import notification.domain.channel.Channel;
+import notification.domain.event.EventType;
+
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -7,9 +11,9 @@ import java.util.Map;
  */
 public record NotificationRequest(
     String eventId,
-    String eventType,
+    EventType eventType,
     String userId,
-    java.util.List<String> channels,
+    List<Channel> channels,
     String templateId,
     Map<String, Object> payload
 ) {}

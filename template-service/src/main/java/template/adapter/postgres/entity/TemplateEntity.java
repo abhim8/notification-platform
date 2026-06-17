@@ -3,6 +3,7 @@ package template.adapter.postgres.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import template.domain.event.EventType;
 
 import java.time.LocalDateTime;
 
@@ -23,8 +24,9 @@ public class TemplateEntity {
     @Column(name = "id", length = 64)
     private String id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "event_type", nullable = false, length = 100)
-    private String eventType;
+    private EventType eventType;
 
     @Column(name = "name", nullable = false, length = 255)
     private String name;
@@ -49,7 +51,7 @@ public class TemplateEntity {
 
     public TemplateEntity() {}
 
-    public TemplateEntity(String id, String eventType, String name, String subject, String body,
+    public TemplateEntity(String id, EventType eventType, String name, String subject, String body,
                         Integer version, Boolean active) {
         this.id = id;
         this.eventType = eventType;

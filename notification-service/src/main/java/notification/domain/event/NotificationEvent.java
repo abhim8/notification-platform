@@ -1,6 +1,7 @@
 package notification.domain.event;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import notification.domain.channel.Channel;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +22,7 @@ public record NotificationEvent(
     String userId,
 
     @JsonProperty(required = true)
-    List<String> channels,
+    List<Channel> channels,
 
     @JsonProperty(required = true)
     String templateId,
@@ -39,7 +40,7 @@ public record NotificationEvent(
             String eventId,
             EventType eventType,
             String userId,
-            List<String> channels,
+            List<Channel> channels,
             String templateId,
             Map<String, Object> payload) {
         return new NotificationEvent(

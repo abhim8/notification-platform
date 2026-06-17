@@ -1,6 +1,7 @@
 package notification.application.usecase;
 
 import notification.domain.channel.DispatchResult;
+import notification.domain.model.NotificationStatus;
 
 import java.util.Map;
 
@@ -11,7 +12,7 @@ import java.util.Map;
 public record SendNotificationResult(
     String eventId,
     boolean success,
-    String status,  // "success", "failed", "dropped"
+    NotificationStatus status,
     String message,
     Map<String, DispatchResult> channelResults
 ) {
@@ -23,7 +24,7 @@ public record SendNotificationResult(
         return new SendNotificationResult(
                 eventId,
                 true,
-                "success",
+                NotificationStatus.SUCCESS,
                 "Notification sent successfully",
                 channelResults
         );
@@ -36,7 +37,7 @@ public record SendNotificationResult(
         return new SendNotificationResult(
                 eventId,
                 false,
-                "failed",
+                NotificationStatus.FAILED,
                 errorMessage,
                 Map.of()
         );
@@ -49,10 +50,9 @@ public record SendNotificationResult(
         return new SendNotificationResult(
                 eventId,
                 false,
-                "dropped",
+                NotificationStatus.DROPPED,
                 reason,
                 Map.of()
         );
     }
 }
-

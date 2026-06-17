@@ -1,5 +1,7 @@
 package template.adapter.rest.dto;
 
+import template.domain.event.EventType;
+
 import java.time.LocalDateTime;
 
 /**
@@ -7,7 +9,7 @@ import java.time.LocalDateTime;
  */
 public record TemplateResponse(
     String id,
-    String eventType,
+    EventType eventType,
     String name,
     String subject,
     String body,

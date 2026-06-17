@@ -1,5 +1,7 @@
 package template.domain;
 
+import template.domain.event.EventType;
+
 import java.time.LocalDateTime;
 
 /**
@@ -10,7 +12,7 @@ import java.time.LocalDateTime;
  */
 public record Template(
     String id,
-    String eventType,
+    EventType eventType,
     String name,
     String subject,
     String body,

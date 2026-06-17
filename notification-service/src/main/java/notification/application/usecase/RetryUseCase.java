@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import notification.application.service.DeliveryAttemptRecorder;
 import notification.application.service.FailedDeliveryLoader;
 import notification.domain.channel.Channel;
+import notification.domain.event.EventType;
 import notification.domain.model.DeliveryStatus;
 import notification.domain.model.RetryPolicy;
 
@@ -117,7 +118,7 @@ public class RetryUseCase {
     public record FailedDelivery(
         String eventId,
         String userId,
-        String eventType,
+        EventType eventType,
         Channel channel,
         int attemptCount,
         LocalDateTime lastAttemptTime

@@ -12,8 +12,8 @@ import notification.adapter.rest.dto.NotificationRequest;
 import notification.adapter.rest.dto.NotificationResponse;
 import notification.application.usecase.SendNotificationResult;
 import notification.application.usecase.SendNotificationUseCase;
-import notification.domain.event.EventType;
 import notification.domain.event.NotificationEvent;
+import notification.domain.model.DeliveryStatus;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -87,19 +87,10 @@ public class NotificationController {
                 return ResponseEntity.badRequest().build();
             }
 
-            // Parse event type
-            EventType eventType;
-            try {
-                eventType = EventType.valueOf(request.eventType());
-            } catch (IllegalArgumentException e) {
-                log.warn("[REST] Invalid event type: {}", request.eventType());
-                return ResponseEntity.badRequest().build();
-            }
-
             // Create notification event
             NotificationEvent event = NotificationEvent.create(
                     request.eventId(),
-                    eventType,
+                    request.eventType(),
                     request.userId(),
                     request.channels(),
                     request.templateId(),
@@ -162,7 +153,7 @@ public class NotificationController {
             // For now, we'll return a placeholder indicating the event was processed
             DeliveryStatusResponse response = new DeliveryStatusResponse(
                     eventId,
-                    "UNKNOWN",  // Would be PENDING, DELIVERED, FAILED, DLQ, DROPPED
+                    null,
                     "Event has been processed. Query delivery-tracker service for detailed status."
             );
 
@@ -223,7 +214,7 @@ public class NotificationController {
     /**
      * Response DTO for delivery status
      */
-    public record DeliveryStatusResponse(String eventId, String overallStatus, String message) {}
+    public record DeliveryStatusResponse(String eventId, DeliveryStatus overallStatus, String message) {}
 
     /**
      * Response DTO for delivery attempts

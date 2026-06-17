@@ -1,5 +1,9 @@
 package delivery.adapter.rest.dto;
 
+import delivery.domain.channel.Channel;
+import delivery.domain.event.EventType;
+import delivery.domain.model.DeliveryStatus;
+
 import java.time.LocalDateTime;
 
 /**
@@ -9,13 +13,12 @@ public record DeliveryAttemptResponse(
     Long id,
     String eventId,
     String userId,
-    String eventType,
-    String channel,
-    String status,
+    EventType eventType,
+    Channel channel,
+    DeliveryStatus status,
     Integer attemptNumber,
     String messageId,
     String errorMessage,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
 ) {}
-

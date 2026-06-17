@@ -2,6 +2,8 @@ package delivery.application;
 
 import delivery.adapter.postgres.entity.DeliveryAttemptEntity;
 import delivery.adapter.postgres.repository.DeliveryAttemptEntityRepository;
+import delivery.domain.channel.Channel;
+import delivery.domain.model.DeliveryStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -25,7 +27,7 @@ public class DeliveryAttemptUseCase {
         return repository.findByEventId(eventId);
     }
 
-    public List<DeliveryAttemptEntity> getAttemptsByEventAndChannel(String eventId, String channel) {
+    public List<DeliveryAttemptEntity> getAttemptsByEventAndChannel(String eventId, Channel channel) {
         log.debug("Fetching attempts for event: {} and channel: {}", eventId, channel);
         return repository.findByEventIdAndChannel(eventId, channel);
     }
@@ -59,6 +61,6 @@ public class DeliveryAttemptUseCase {
                 ? LocalDateTime.parse(since)
                 : LocalDateTime.now().minusDays(1);
         return repository.findByStatusAndUpdatedAtAfterOrderByUpdatedAtAsc(
-                "FAILED", cutoff, PageRequest.of(0, limit));
+                DeliveryStatus.FAILED, cutoff, PageRequest.of(0, limit));
     }
 }

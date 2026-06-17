@@ -76,61 +76,52 @@ public class SendNotificationUseCase {
         boolean hasSuccess = false;
         boolean hasFailure = false;
 
-        for (String channelName : event.channels()) {
-            try {
-                Channel channel = Channel.fromString(channelName);
-                ChannelDispatcher dispatcher = channelDispatchers.get(channel);
+        for (Channel channel : event.channels()) {
+            ChannelDispatcher dispatcher = channelDispatchers.get(channel);
 
-                if (dispatcher == null) {
-                    log.warn("[WARN] No dispatcher found for channel: {}", channel);
-                    channelResults.put(channelName, DispatchResult.failure("No dispatcher registered"));
-                    hasFailure = true;
-                    continue;
-                }
+            if (dispatcher == null) {
+                log.warn("[WARN] No dispatcher found for channel: {}", channel);
+                channelResults.put(channel.getValue(), DispatchResult.failure("No dispatcher registered"));
+                hasFailure = true;
+                continue;
+            }
 
-                // Extract recipient from payload (format: channel_recipient, e.g., "email_user@example.com")
-                String recipientKey = channel.getValue() + "_recipient";
-                Object recipientObj = event.payload().get(recipientKey);
-                String recipient = recipientObj != null ? recipientObj.toString() : null;
+            // Extract recipient from payload (format: channel_recipient, e.g., "email_user@example.com")
+            Object recipientObj = event.payload().get(channel.recipientKey());
+            String recipient = recipientObj != null ? recipientObj.toString() : null;
 
-                if (recipient == null || recipient.isBlank()) {
-                    log.warn("[WARN] No recipient found for channel {}: eventId={}", channel, event.eventId());
-                    channelResults.put(channelName, DispatchResult.failure("No recipient provided"));
-                    hasFailure = true;
-                    continue;
-                }
+            if (recipient == null || recipient.isBlank()) {
+                log.warn("[WARN] No recipient found for channel {}: eventId={}", channel, event.eventId());
+                channelResults.put(channel.getValue(), DispatchResult.failure("No recipient provided"));
+                hasFailure = true;
+                continue;
+            }
 
-                // Dispatch through channel
-                DispatchResult result = dispatcher.dispatch(event, recipient, renderedContent);
-                channelResults.put(channelName, result);
+            // Dispatch through channel
+            DispatchResult result = dispatcher.dispatch(event, recipient, renderedContent);
+            channelResults.put(channel.getValue(), result);
 
-                if (result.success()) {
-                    log.info("[SUCCESS] Event dispatched: eventId={}, channel={}, messageId={}",
-                            event.eventId(), channel, result.messageId());
-                    hasSuccess = true;
-                } else {
-                    log.warn("[FAILURE] Event dispatch failed: eventId={}, channel={}, error={}",
-                            event.eventId(), channel, result.errorMessage());
-                    hasFailure = true;
-                }
-
-                // Record attempt
-                attemptRecorder.recordAttempt(new DeliveryAttemptCommand(
-                        event.eventId(),
-                        event.userId(),
-                        event.eventType().name(),
-                        channel,
-                        result.success() ? DeliveryStatus.DELIVERED : DeliveryStatus.FAILED,
-                        1,
-                        result.messageId(),
-                        result.errorMessage()
-                ));
-
-            } catch (IllegalArgumentException e) {
-                log.warn("[WARN] Invalid channel: channelName={}, eventId={}", channelName, event.eventId());
-                channelResults.put(channelName, DispatchResult.failure("Invalid channel: " + e.getMessage()));
+            if (result.success()) {
+                log.info("[SUCCESS] Event dispatched: eventId={}, channel={}, messageId={}",
+                        event.eventId(), channel, result.messageId());
+                hasSuccess = true;
+            } else {
+                log.warn("[FAILURE] Event dispatch failed: eventId={}, channel={}, error={}",
+                        event.eventId(), channel, result.errorMessage());
                 hasFailure = true;
             }
+
+            // Record attempt
+            attemptRecorder.recordAttempt(new DeliveryAttemptCommand(
+                    event.eventId(),
+                    event.userId(),
+                    event.eventType(),
+                    channel,
+                    result.success() ? DeliveryStatus.DELIVERED : DeliveryStatus.FAILED,
+                    1,
+                    result.messageId(),
+                    result.errorMessage()
+            ));
         }
 
         if (!hasSuccess && hasFailure) {

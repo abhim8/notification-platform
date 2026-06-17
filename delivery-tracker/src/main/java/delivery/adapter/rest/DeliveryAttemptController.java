@@ -5,6 +5,7 @@ import delivery.adapter.rest.dto.CreateDeliveryAttemptRequest;
 import delivery.adapter.rest.dto.DeliveryAttemptResponse;
 import delivery.application.CreateAttemptCommand;
 import delivery.application.DeliveryAttemptUseCase;
+import delivery.domain.channel.Channel;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -82,7 +83,8 @@ public class DeliveryAttemptController {
         try {
             log.debug("GET /api/v1/delivery-attempts/events/{}/channels/{}", eventId, channel);
 
-            List<DeliveryAttemptEntity> attempts = useCase.getAttemptsByEventAndChannel(eventId, channel);
+            Channel channelEnum = Channel.valueOf(channel.toUpperCase());
+            List<DeliveryAttemptEntity> attempts = useCase.getAttemptsByEventAndChannel(eventId, channelEnum);
 
             if (attempts.isEmpty()) {
                 return ResponseEntity.notFound().build();
@@ -94,6 +96,9 @@ public class DeliveryAttemptController {
 
             return ResponseEntity.ok(responses);
 
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid channel: {}", channel);
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             log.error("Error retrieving attempts for event: {} and channel: {}", eventId, channel, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -187,6 +192,9 @@ public class DeliveryAttemptController {
 
             return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(saved));
 
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid enum value in request: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             log.error("Error saving delivery attempt for event: {}", request.eventId(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -243,4 +251,3 @@ public class DeliveryAttemptController {
         );
     }
 }
-

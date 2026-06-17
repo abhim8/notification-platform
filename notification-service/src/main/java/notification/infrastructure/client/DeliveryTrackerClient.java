@@ -6,6 +6,7 @@ import notification.application.service.FailedDeliveryLoader;
 import notification.application.usecase.DeliveryAttemptCommand;
 import notification.application.usecase.RetryUseCase;
 import notification.domain.channel.Channel;
+import notification.domain.event.EventType;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
@@ -59,7 +60,7 @@ public class DeliveryTrackerClient implements DeliveryAttemptRecorder, FailedDel
                             dto.eventId(),
                             dto.userId(),
                             dto.eventType(),
-                            Channel.fromString(dto.channel()),
+                            dto.channel(),
                             dto.attemptNumber(),
                             dto.updatedAt()
                     ))
@@ -74,8 +75,8 @@ public class DeliveryTrackerClient implements DeliveryAttemptRecorder, FailedDel
     record FailedDeliveryDto(
             String eventId,
             String userId,
-            String eventType,
-            String channel,
+            EventType eventType,
+            Channel channel,
             int attemptNumber,
             LocalDateTime updatedAt
     ) {}

@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import notification.domain.channel.Channel;
 import notification.domain.channel.ChannelDispatcher;
 import notification.domain.channel.DispatchResult;
+import notification.domain.event.EventType;
 import notification.domain.event.NotificationEvent;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -48,7 +49,7 @@ public class WebhookAdapter implements ChannelDispatcher {
             // Build webhook payload
             WebhookPayload payload = new WebhookPayload(
                     event.eventId(),
-                    event.eventType().name(),
+                    event.eventType(),
                     event.userId(),
                     content,
                     System.currentTimeMillis()
@@ -106,7 +107,7 @@ public class WebhookAdapter implements ChannelDispatcher {
      */
     public record WebhookPayload(
             String eventId,
-            String eventType,
+            EventType eventType,
             String userId,
             String content,
             long timestamp
