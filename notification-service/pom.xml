@@ -17,10 +17,10 @@
     <description>Core notification service with Kafka consumer, channel dispatcher, and retry logic</description>
 
     <dependencies>
-        <!-- Spring Boot -->
+        <!-- JPA is NOT needed — no entities; JDBC starter provides DataSource + HikariCP for ShedLock -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework.boot</groupId>
@@ -29,45 +29,16 @@
             </exclusions>
         </dependency>
 
-        <!-- log4j2 -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-log4j2</artifactId>
-        </dependency>
-
-        <!-- json template layout -->
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-layout-template-json</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka</artifactId>
-        </dependency>
-
-        <!-- Kafka -->
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
-        </dependency>
-
-        <!-- Database -->
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
-        <!-- Redis -->
+        <!-- Redis for idempotency / deduplication -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -75,26 +46,18 @@
             <artifactId>jedis</artifactId>
         </dependency>
 
-        <!-- JSON Processing -->
+        <!-- Kafka for event consumption and retry/DLQ publishing -->
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
         </dependency>
 
-        <!-- Lombok -->
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
         </dependency>
 
-        <!-- Swagger / OpenAPI -->
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-        </dependency>
-
-        <!-- ShedLock -->
+        <!-- ShedLock for distributed scheduler locking -->
         <dependency>
             <groupId>net.javacrumbs.shedlock</groupId>
             <artifactId>shedlock-spring</artifactId>
@@ -105,18 +68,13 @@
             <artifactId>shedlock-provider-jdbc</artifactId>
         </dependency>
 
-        <!-- Liquibase -->
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-        </dependency>
-
-        <!-- Channel SDKs (SendGrid, Twilio, Firebase) -->
+        <!-- SendGrid SDK -->
         <dependency>
             <groupId>com.sendgrid</groupId>
             <artifactId>sendgrid-java</artifactId>
         </dependency>
 
+        <!-- Twilio SDK -->
         <dependency>
             <groupId>com.twilio.sdk</groupId>
             <artifactId>twilio</artifactId>
@@ -128,22 +86,27 @@
             </exclusions>
         </dependency>
 
+        <!-- Firebase Admin SDK -->
         <dependency>
             <groupId>com.google.firebase</groupId>
             <artifactId>firebase-admin</artifactId>
         </dependency>
 
-        <!-- Testing -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
+        <!-- Kafka test support -->
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka-test</artifactId>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
@@ -170,4 +133,3 @@
         </plugins>
     </build>
 </project>
-

@@ -95,14 +95,14 @@ idempotency:
   ttl-hours: ${IDEMPOTENCY_TTL_HOURS:24}
 
 template-service:
-  enabled: ${TEMPLATE_SERVICE_ENABLED:false}
+  enabled: ${TEMPLATE_SERVICE_ENABLED:true}
   base-url: ${TEMPLATE_SERVICE_URL:http://localhost:8002}
   endpoints:
     get-template: /api/v1/templates/{templateId}
     render-template: /api/v1/templates/{templateId}/render
 
 delivery-tracker:
-  enabled: ${DELIVERY_TRACKER_ENABLED:false}
+  enabled: ${DELIVERY_TRACKER_ENABLED:true}
   base-url: ${DELIVERY_TRACKER_URL:http://localhost:8003}
   endpoints:
     record-attempt: /api/v1/delivery-attempts

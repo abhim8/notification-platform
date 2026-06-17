@@ -115,110 +115,78 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- Spring Boot Starters -->
+        <!-- Spring Boot Web (required by all services) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka</artifactId>
-        </dependency>
-
-        <!-- Actuator -->
+        <!-- Actuator (required by all services for health/metrics) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
-        <!-- PostgreSQL Driver -->
+        <!-- PostgreSQL Driver (required by all services) -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Redis Jedis Client -->
+        <!-- Liquibase (required by all services for DB migrations) -->
         <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
         </dependency>
 
-        <!-- ShedLock for Distributed Scheduling -->
-        <dependency>
-            <groupId>net.javacrumbs.shedlock</groupId>
-            <artifactId>shedlock-spring</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>net.javacrumbs.shedlock</groupId>
-            <artifactId>shedlock-provider-jdbc</artifactId>
-        </dependency>
-
-        <!-- Lombok -->
+        <!-- Lombok (required by all services) -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
 
-        <!-- Swagger / OpenAPI -->
+        <!-- Swagger / OpenAPI (required by all services) -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
         </dependency>
 
-        <!-- SendGrid -->
+        <!-- Log4j2 (required by all services) -->
         <dependency>
-            <groupId>com.sendgrid</groupId>
-            <artifactId>sendgrid-java</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
         </dependency>
 
-        <!-- Twilio -->
         <dependency>
-            <groupId>com.twilio.sdk</groupId>
-            <artifactId>twilio</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-layout-template-json</artifactId>
+            <version>2.23.1</version>
         </dependency>
 
-        <!-- Firebase -->
-        <dependency>
-            <groupId>com.google.firebase</groupId>
-            <artifactId>firebase-admin</artifactId>
-        </dependency>
-
-        <!-- Jackson -->
+        <!-- Jackson (required by all services for JSON) -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
-        <!-- Testing -->
+        <!-- Testing (required by all services) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka-test</artifactId>
             <scope>test</scope>
         </dependency>
 
