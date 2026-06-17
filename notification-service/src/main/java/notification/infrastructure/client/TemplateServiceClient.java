@@ -1,4 +1,4 @@
-package notification.infrastructure.template;
+package notification.infrastructure.client;
 
 import lombok.extern.slf4j.Slf4j;
 import notification.application.service.TemplateResolutionException;
@@ -10,23 +10,24 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Map;
 
 @Slf4j
-public class RestTemplateResolver implements TemplateResolver {
+public class TemplateServiceClient implements TemplateResolver {
 
     private final RestTemplate restTemplate;
-    private final String baseUrl;
+    private final String getTemplateUrl;
+    private final String renderTemplateUrl;
 
-    public RestTemplateResolver(RestTemplate restTemplate, String baseUrl) {
+    public TemplateServiceClient(RestTemplate restTemplate, String getTemplateUrl, String renderTemplateUrl) {
         this.restTemplate = restTemplate;
-        this.baseUrl = baseUrl;
+        this.getTemplateUrl = getTemplateUrl;
+        this.renderTemplateUrl = renderTemplateUrl;
     }
 
     @Override
     public String resolveTemplate(String templateId, Map<String, Object> payload) {
         try {
             log.debug("[TEMPLATE] Resolving template via REST: templateId={}", templateId);
-            String url = baseUrl + "/api/v1/templates/{templateId}/render";
             ResponseEntity<RenderResponse> response = restTemplate.postForEntity(
-                    url, payload, RenderResponse.class, templateId);
+                    renderTemplateUrl, payload, RenderResponse.class, templateId);
             RenderResponse body = response.getBody();
             if (body == null || body.content() == null) {
                 throw new TemplateResolutionException("Empty response from template-service for: " + templateId);
@@ -45,8 +46,7 @@ public class RestTemplateResolver implements TemplateResolver {
     public boolean templateExists(String templateId) {
         try {
             log.debug("[TEMPLATE] Checking template existence via REST: templateId={}", templateId);
-            String url = baseUrl + "/api/v1/templates/{templateId}";
-            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class, templateId);
+            ResponseEntity<String> response = restTemplate.getForEntity(getTemplateUrl, String.class, templateId);
             return response.getStatusCode().is2xxSuccessful();
         } catch (HttpClientErrorException.NotFound e) {
             return false;

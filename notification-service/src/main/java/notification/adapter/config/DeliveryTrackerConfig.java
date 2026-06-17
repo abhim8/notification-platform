@@ -2,34 +2,31 @@ package notification.adapter.config;
 
 import notification.application.service.DeliveryAttemptRecorder;
 import notification.application.service.FailedDeliveryLoader;
-import notification.infrastructure.deliverytracker.HttpDeliveryAttemptRecorder;
-import notification.infrastructure.deliverytracker.HttpFailedDeliveryLoader;
+import notification.infrastructure.client.DeliveryTrackerClient;
 import notification.infrastructure.deliverytracker.InMemoryDeliveryStore;
 import notification.infrastructure.deliverytracker.MockDeliveryAttemptRecorder;
 import notification.infrastructure.deliverytracker.MockFailedDeliveryLoader;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
+@EnableConfigurationProperties(DeliveryTrackerProperties.class)
 public class DeliveryTrackerConfig {
 
     @Bean
     @ConditionalOnProperty(value = "delivery-tracker.enabled", havingValue = "true")
-    public DeliveryAttemptRecorder httpDeliveryAttemptRecorder(
+    public DeliveryTrackerClient deliveryTrackerClient(
             RestTemplate restTemplate,
-            @Value("${delivery-tracker.base-url}") String baseUrl) {
-        return new HttpDeliveryAttemptRecorder(restTemplate, baseUrl);
-    }
-
-    @Bean
-    @ConditionalOnProperty(value = "delivery-tracker.enabled", havingValue = "true")
-    public FailedDeliveryLoader httpFailedDeliveryLoader(
-            RestTemplate restTemplate,
-            @Value("${delivery-tracker.base-url}") String baseUrl) {
-        return new HttpFailedDeliveryLoader(restTemplate, baseUrl);
+            DeliveryTrackerProperties properties) {
+        String baseUrl = properties.getBaseUrl();
+        var endpoints = properties.getEndpoints();
+        return new DeliveryTrackerClient(
+                restTemplate,
+                baseUrl + endpoints.getRecordAttempt(),
+                baseUrl + endpoints.getFailedAttempts());
     }
 
     @Bean

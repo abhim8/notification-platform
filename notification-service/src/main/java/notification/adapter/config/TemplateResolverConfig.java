@@ -1,10 +1,10 @@
 package notification.adapter.config;
 
 import notification.application.service.TemplateResolver;
+import notification.infrastructure.client.TemplateServiceClient;
 import notification.infrastructure.template.MockTemplateResolver;
-import notification.infrastructure.template.RestTemplateResolver;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
@@ -17,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
  * the actual template-service REST API.
  */
 @Configuration
+@EnableConfigurationProperties(TemplateServiceProperties.class)
 public class TemplateResolverConfig {
 
     /**
@@ -30,16 +31,19 @@ public class TemplateResolverConfig {
     }
 
     /**
-     * Provide RestTemplateResolver when template-service integration is enabled.
-     * When this bean is created, {@link #mockTemplateResolver()} is skipped
-     * due to {@code @ConditionalOnMissingBean}.
+     * Provide TemplateServiceClient when template-service integration is enabled.
      */
     @Bean
     @ConditionalOnProperty(value = "template-service.enabled", havingValue = "true")
-    public TemplateResolver restTemplateResolver(
+    public TemplateResolver templateServiceClient(
             RestTemplate restTemplate,
-            @Value("${template-service.base-url}") String baseUrl) {
-        return new RestTemplateResolver(restTemplate, baseUrl);
+            TemplateServiceProperties properties) {
+        String baseUrl = properties.getBaseUrl();
+        var endpoints = properties.getEndpoints();
+        return new TemplateServiceClient(
+                restTemplate,
+                baseUrl + endpoints.getGetTemplate(),
+                baseUrl + endpoints.getRenderTemplate());
     }
 }
 

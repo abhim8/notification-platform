@@ -21,11 +21,15 @@ import java.util.Map;
 public class ChannelDispatcherConfig {
 
     /**
-     * RestTemplate bean for webhook HTTP calls
+     * RestTemplate bean for all outbound HTTP calls.
+     * Configured with sensible connect/read timeouts.
      */
     @Bean
     public RestTemplate restTemplate() {
-        return new RestTemplate();
+        var factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(5000);
+        factory.setReadTimeout(10000);
+        return new RestTemplate(factory);
     }
 
     /**

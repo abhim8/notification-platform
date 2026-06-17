@@ -1,7 +1,9 @@
-package notification.infrastructure.deliverytracker;
+package notification.infrastructure.client;
 
 import lombok.extern.slf4j.Slf4j;
+import notification.application.service.DeliveryAttemptRecorder;
 import notification.application.service.FailedDeliveryLoader;
+import notification.application.usecase.DeliveryAttemptCommand;
 import notification.application.usecase.RetryUseCase;
 import notification.domain.channel.Channel;
 import org.springframework.core.ParameterizedTypeReference;
@@ -12,25 +14,38 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
-public class HttpFailedDeliveryLoader implements FailedDeliveryLoader {
+public class DeliveryTrackerClient implements DeliveryAttemptRecorder, FailedDeliveryLoader {
 
     private final RestTemplate restTemplate;
-    private final String baseUrl;
+    private final String recordAttemptUrl;
+    private final String failedAttemptsUrl;
 
-    public HttpFailedDeliveryLoader(RestTemplate restTemplate, String baseUrl) {
+    public DeliveryTrackerClient(RestTemplate restTemplate, String recordAttemptUrl, String failedAttemptsUrl) {
         this.restTemplate = restTemplate;
-        this.baseUrl = baseUrl;
+        this.recordAttemptUrl = recordAttemptUrl;
+        this.failedAttemptsUrl = failedAttemptsUrl;
+    }
+
+    @Override
+    public void recordAttempt(DeliveryAttemptCommand attempt) {
+        try {
+            log.debug("[TRACKER] Recording delivery attempt via HTTP: eventId={}, channel={}, status={}",
+                    attempt.eventId(), attempt.channel(), attempt.status());
+            restTemplate.postForEntity(recordAttemptUrl, attempt, Void.class);
+        } catch (Exception e) {
+            log.error("[TRACKER] Failed to record delivery attempt via HTTP: eventId={}, channel={}",
+                    attempt.eventId(), attempt.channel(), e);
+        }
     }
 
     @Override
     public List<RetryUseCase.FailedDelivery> loadFailedDeliveries() {
         try {
             log.debug("[TRACKER] Loading failed deliveries via HTTP");
-            String url = baseUrl + "/api/v1/delivery-attempts/failed?since={since}&limit={limit}";
             LocalDateTime since = LocalDateTime.now().minusDays(1);
 
             List<FailedDeliveryDto> dtos = restTemplate.exchange(
-                    url, HttpMethod.GET, null,
+                    failedAttemptsUrl, HttpMethod.GET, null,
                     new ParameterizedTypeReference<List<FailedDeliveryDto>>() {},
                     since.toString(), 100
             ).getBody();
@@ -55,4 +70,13 @@ public class HttpFailedDeliveryLoader implements FailedDeliveryLoader {
             return List.of();
         }
     }
+
+    record FailedDeliveryDto(
+            String eventId,
+            String userId,
+            String eventType,
+            String channel,
+            int attemptNumber,
+            LocalDateTime updatedAt
+    ) {}
 }
