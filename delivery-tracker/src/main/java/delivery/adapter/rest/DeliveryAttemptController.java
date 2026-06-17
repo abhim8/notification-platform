@@ -2,6 +2,7 @@ package delivery.adapter.rest;
 
 import delivery.adapter.postgres.entity.DeliveryAttemptEntity;
 import delivery.adapter.postgres.repository.DeliveryAttemptEntityRepository;
+import delivery.adapter.rest.dto.CreateDeliveryAttemptRequest;
 import delivery.adapter.rest.dto.DeliveryAttemptResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -9,13 +10,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
@@ -161,6 +161,82 @@ public class DeliveryAttemptController {
 
         } catch (Exception e) {
             log.error("Error retrieving attempts for user: {}", userId, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Record a delivery attempt
+     */
+    @PostMapping
+    @Operation(summary = "Record delivery attempt", description = "Persists a delivery attempt for tracking and retry")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Attempt recorded"),
+            @ApiResponse(responseCode = "400", description = "Invalid request")
+    })
+    public ResponseEntity<DeliveryAttemptResponse> createAttempt(
+            @Parameter(description = "Delivery attempt data", required = true)
+            @RequestBody CreateDeliveryAttemptRequest request) {
+
+        try {
+            log.debug("POST /api/v1/delivery-attempts");
+
+            DeliveryAttemptEntity entity = new DeliveryAttemptEntity(
+                    request.eventId(),
+                    request.userId(),
+                    request.eventType(),
+                    request.channel(),
+                    request.status(),
+                    request.attemptNumber()
+            );
+            entity.setMessageId(request.messageId());
+            entity.setErrorMessage(request.errorMessage());
+
+            DeliveryAttemptEntity saved = repository.save(entity);
+
+            log.debug("Delivery attempt saved: id={}, eventId={}", saved.getId(), saved.getEventId());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(saved));
+
+        } catch (Exception e) {
+            log.error("Error saving delivery attempt for event: {}", request.eventId(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Get failed delivery attempts for retry processing
+     */
+    @GetMapping("/failed")
+    @Operation(summary = "Get failed attempts", description = "Retrieves failed delivery attempts for retry processing")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Failed attempts retrieved")
+    })
+    public ResponseEntity<List<DeliveryAttemptResponse>> getFailedAttempts(
+            @Parameter(description = "Only attempts updated after this timestamp (ISO-8601)")
+            @RequestParam(required = false) String since,
+            @Parameter(description = "Maximum number of attempts to return")
+            @RequestParam(defaultValue = "100") int limit) {
+
+        try {
+            log.debug("GET /api/v1/delivery-attempts/failed");
+
+            ZonedDateTime cutoff = since != null
+                    ? ZonedDateTime.parse(since)
+                    : ZonedDateTime.now().minusDays(1);
+
+            List<DeliveryAttemptEntity> attempts = repository
+                    .findByStatusAndUpdatedAtAfterOrderByUpdatedAtAsc(
+                            "FAILED", cutoff, PageRequest.of(0, limit));
+
+            List<DeliveryAttemptResponse> responses = attempts.stream()
+                    .map(this::toResponse)
+                    .toList();
+
+            return ResponseEntity.ok(responses);
+
+        } catch (Exception e) {
+            log.error("Error retrieving failed attempts", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

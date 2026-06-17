@@ -94,6 +94,14 @@ webhook:
 idempotency:
   ttl-hours: ${IDEMPOTENCY_TTL_HOURS:24}
 
+template-service:
+  enabled: ${TEMPLATE_SERVICE_ENABLED:true}
+  base-url: ${TEMPLATE_SERVICE_URL:http://localhost:8002}
+
+delivery-tracker:
+  enabled: ${DELIVERY_TRACKER_ENABLED:true}
+  base-url: ${DELIVERY_TRACKER_URL:http://localhost:8003}
+
 springdoc:
   api-docs:
     path: /v3/api-docs

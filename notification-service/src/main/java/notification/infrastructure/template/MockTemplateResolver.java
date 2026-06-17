@@ -3,7 +3,6 @@ package notification.infrastructure.template;
 import lombok.extern.slf4j.Slf4j;
 import notification.application.service.TemplateResolutionException;
 import notification.application.service.TemplateResolver;
-import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
@@ -13,7 +12,6 @@ import java.util.Map;
  * In a full system, this would call the template-service REST API.
  * For now, we mock template resolution with simple string formatting.
  */
-@Service
 @Slf4j
 public class MockTemplateResolver implements TemplateResolver {
 

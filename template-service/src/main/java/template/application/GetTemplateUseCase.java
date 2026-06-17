@@ -2,12 +2,10 @@ package template.application;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import template.adapter.postgres.entity.TemplateEntity;
-import template.adapter.postgres.repository.TemplateEntityRepository;
 import template.domain.Template;
+import template.domain.TemplateRepository;
 
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Use case for retrieving and rendering notification templates.
@@ -18,9 +16,9 @@ import java.util.Optional;
 @Slf4j
 public class GetTemplateUseCase {
 
-    private final TemplateEntityRepository repository;
+    private final TemplateRepository repository;
 
-    public GetTemplateUseCase(TemplateEntityRepository repository) {
+    public GetTemplateUseCase(TemplateRepository repository) {
         this.repository = repository;
     }
 
@@ -51,26 +49,11 @@ public class GetTemplateUseCase {
     public Template getTemplate(String templateId) {
         log.debug("[TEMPLATE] Retrieving template: templateId={}", templateId);
 
-        Optional<TemplateEntity> entity = repository.findByIdAndActiveTrue(templateId);
-
-        if (entity.isEmpty()) {
-            log.warn("[NOT_FOUND] Template not found or inactive: templateId={}", templateId);
-            throw new TemplateNotFoundException("Template not found: " + templateId);
-        }
-
-        TemplateEntity te = entity.get();
-
-        Template template = new Template(
-                te.getId(),
-                te.getEventType(),
-                te.getName(),
-                te.getSubject(),
-                te.getBody(),
-                te.getVersion(),
-                te.getActive(),
-                te.getCreatedAt(),
-                te.getUpdatedAt()
-        );
+        Template template = repository.findByIdAndActiveTrue(templateId)
+                .orElseThrow(() -> {
+                    log.warn("[NOT_FOUND] Template not found or inactive: templateId={}", templateId);
+                    return new TemplateNotFoundException("Template not found: " + templateId);
+                });
 
         log.debug("[SUCCESS] Template retrieved: templateId={}, eventType={}", templateId, template.eventType());
         return template;

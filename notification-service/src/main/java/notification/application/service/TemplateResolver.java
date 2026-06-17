@@ -1,7 +1,5 @@
 package notification.application.service;
 
-import java.util.Optional;
-
 /**
  * Port for resolving/rendering notification templates.
  *

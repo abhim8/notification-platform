@@ -1,7 +1,5 @@
 package notification.adapter.config;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import notification.application.service.DeduplicationService;
 import notification.application.service.TemplateResolver;
 import notification.application.usecase.RetryUseCase;
@@ -9,7 +7,13 @@ import notification.application.usecase.SendNotificationUseCase;
 import notification.domain.channel.Channel;
 import notification.domain.channel.ChannelDispatcher;
 import notification.domain.model.RetryPolicy;
-import notification.infrastructure.postgres.adapter.PostgresDeliveryAttemptRecorder;
+import notification.infrastructure.deliverytracker.HttpDeliveryAttemptRecorder;
+import notification.infrastructure.deliverytracker.HttpFailedDeliveryLoader;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 
@@ -30,6 +34,17 @@ public class NotificationServiceConfig {
     }
 
     /**
+     * HTTP-based delivery attempt recorder that delegates to delivery-tracker service
+     */
+    @Bean
+    @ConditionalOnProperty(value = "delivery-tracker.enabled", havingValue = "true")
+    public HttpDeliveryAttemptRecorder httpDeliveryAttemptRecorder(
+            RestTemplate restTemplate,
+            @Value("${delivery-tracker.base-url}") String baseUrl) {
+        return new HttpDeliveryAttemptRecorder(restTemplate, baseUrl);
+    }
+
+    /**
      * SendNotificationUseCase bean
      */
     @Bean
@@ -37,7 +52,7 @@ public class NotificationServiceConfig {
             DeduplicationService deduplicationService,
             TemplateResolver templateResolver,
             Map<Channel, ChannelDispatcher> channelDispatchers,
-            PostgresDeliveryAttemptRecorder deliveryAttemptRecorder) {
+            HttpDeliveryAttemptRecorder deliveryAttemptRecorder) {
 
         return new SendNotificationUseCase(
                 deduplicationService,
@@ -48,16 +63,25 @@ public class NotificationServiceConfig {
     }
 
     /**
+     * HTTP-based failed delivery loader that queries delivery-tracker service
+     */
+    @Bean
+    @ConditionalOnProperty(value = "delivery-tracker.enabled", havingValue = "true")
+    public HttpFailedDeliveryLoader httpFailedDeliveryLoader(
+            RestTemplate restTemplate,
+            @Value("${delivery-tracker.base-url}") String baseUrl) {
+        return new HttpFailedDeliveryLoader(restTemplate, baseUrl);
+    }
+
+    /**
      * RetryUseCase bean
      */
     @Bean
     public RetryUseCase retryUseCase(
             RetryPolicy retryPolicy,
             SendNotificationUseCase sendNotificationUseCase,
-            PostgresDeliveryAttemptRecorder deliveryAttemptRecorder) {
-
-        // Stub implementation for FailedDeliveryLoader
-        RetryUseCase.FailedDeliveryLoader failedDeliveryLoader = () -> java.util.List.of();
+            HttpDeliveryAttemptRecorder deliveryAttemptRecorder,
+            HttpFailedDeliveryLoader failedDeliveryLoader) {
 
         return new RetryUseCase(
                 retryPolicy,

@@ -9,7 +9,7 @@
 
     <changeSet id="v1-create-delivery-attempts" author="abhilash">
 
-        <createTable tableName="delivery_attempts_2">
+        <createTable tableName="delivery_attempts">
 
             <column name="id" type="BIGSERIAL">
                 <constraints primaryKey="true"
@@ -57,45 +57,45 @@
 
         <!-- Indexes -->
         <createIndex
-                tableName="delivery_attempts_2"
-                indexName="idx_delivery_attempts2_event_id">
+                tableName="delivery_attempts"
+                indexName="idx_event_id">
             <column name="event_id"/>
         </createIndex>
 
         <createIndex
-                tableName="delivery_attempts_2"
-                indexName="idx_delivery_attempts2_user_id">
+                tableName="delivery_attempts"
+                indexName="idx_user_id">
             <column name="user_id"/>
         </createIndex>
 
         <createIndex
-                tableName="delivery_attempts_2"
-                indexName="idx_delivery_attempts2_channel">
+                tableName="delivery_attempts"
+                indexName="idx_channel">
             <column name="channel"/>
         </createIndex>
 
         <createIndex
-                tableName="delivery_attempts_2"
-                indexName="idx_delivery_attempts2_status">
+                tableName="delivery_attempts"
+                indexName="idx_status">
             <column name="status"/>
         </createIndex>
 
         <createIndex
-                tableName="delivery_attempts_2"
-                indexName="idx_delivery_attempts2_created_at">
+                tableName="delivery_attempts"
+                indexName="idx_created_at">
             <column name="created_at"/>
         </createIndex>
 
         <createIndex
-                tableName="delivery_attempts_2"
-                indexName="idx_delivery_attempts2_event_channel">
+                tableName="delivery_attempts"
+                indexName="idx_event_channel">
             <column name="event_id"/>
             <column name="channel"/>
         </createIndex>
 
         <createIndex
-                tableName="delivery_attempts_2"
-                indexName="idx_delivery_attempts2_event_attempt">
+                tableName="delivery_attempts"
+                indexName="idx_event_attempt">
             <column name="event_id"/>
             <column name="attempt_number"/>
         </createIndex>

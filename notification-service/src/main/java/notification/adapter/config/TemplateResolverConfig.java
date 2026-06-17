@@ -1,10 +1,13 @@
 package notification.adapter.config;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import notification.application.service.TemplateResolver;
+import notification.infrastructure.template.MockTemplateResolver;
+import notification.infrastructure.template.RestTemplateResolver;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import notification.infrastructure.template.MockTemplateResolver;
-import notification.application.service.TemplateResolver;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Conditional bean configuration - provides MockTemplateResolver
@@ -21,9 +24,22 @@ public class TemplateResolverConfig {
      * This is useful for development and testing.
      */
     @Bean
-    @ConditionalOnMissingBean(TemplateResolver.class)
-    public TemplateResolver templateResolver() {
+    @ConditionalOnProperty(value = "template-service.enabled", havingValue = "false")
+    public TemplateResolver mockTemplateResolver() {
         return new MockTemplateResolver();
+    }
+
+    /**
+     * Provide RestTemplateResolver when template-service integration is enabled.
+     * When this bean is created, {@link #mockTemplateResolver()} is skipped
+     * due to {@code @ConditionalOnMissingBean}.
+     */
+    @Bean
+    @ConditionalOnProperty(value = "template-service.enabled", havingValue = "true")
+    public TemplateResolver restTemplateResolver(
+            RestTemplate restTemplate,
+            @Value("${template-service.base-url}") String baseUrl) {
+        return new RestTemplateResolver(restTemplate, baseUrl);
     }
 }
 

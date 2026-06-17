@@ -114,13 +114,16 @@ public class SendNotificationUseCase {
                 }
 
                 // Record attempt
-                attemptRecorder.recordAttempt(
+                attemptRecorder.recordAttempt(new DeliveryAttemptCommand(
                         event.eventId(),
+                        event.userId(),
+                        event.eventType().name(),
                         channel,
                         result.success() ? DeliveryStatus.DELIVERED : DeliveryStatus.FAILED,
+                        1,
                         result.messageId(),
                         result.errorMessage()
-                );
+                ));
 
             } catch (IllegalArgumentException e) {
                 log.warn("[WARN] Invalid channel: channelName={}, eventId={}", channelName, event.eventId());
@@ -140,7 +143,6 @@ public class SendNotificationUseCase {
      * Port for recording delivery attempts in the database
      */
     public interface DeliveryAttemptRecorder {
-        void recordAttempt(String eventId, Channel channel, DeliveryStatus status,
-                          String messageId, String errorMessage);
+        void recordAttempt(DeliveryAttemptCommand attempt);
     }
 }

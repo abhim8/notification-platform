@@ -6,6 +6,7 @@ import notification.application.usecase.SendNotificationResult;
 import notification.application.usecase.SendNotificationUseCase;
 import notification.domain.event.NotificationEvent;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -52,11 +53,12 @@ public class NotificationKafkaConsumer {
             @Payload String payload,
             @Header(name = "kafka_receivedPartitionId", required = false) int partition,
             @Header(name = "kafka_offset", required = false) long offset,
-            @Header(name = "kafka_receivedTopic", required = false) String topic) {
+            @Header(name = "kafka_receivedTopic", required = false) String topic,
+            Acknowledgment ack) {
 
         log.debug("[CONSUME] Transactional event received: topic={}, partition={}, offset={}",
                 topic, partition, offset);
-        processNotificationEvent(payload, "transactional");
+        processNotificationEvent(payload, "transactional", ack);
     }
 
     /**
@@ -71,10 +73,11 @@ public class NotificationKafkaConsumer {
     public void onMarketingNotification(
             @Payload String payload,
             @Header(name = "kafka_receivedPartitionId", required = false) int partition,
-            @Header(name = "kafka_offset", required = false) long offset) {
+            @Header(name = "kafka_offset", required = false) long offset,
+            Acknowledgment ack) {
 
         log.debug("[CONSUME] Marketing event received: partition={}, offset={}", partition, offset);
-        processNotificationEvent(payload, "marketing");
+        processNotificationEvent(payload, "marketing", ack);
     }
 
     /**
@@ -89,16 +92,17 @@ public class NotificationKafkaConsumer {
     public void onAlertNotification(
             @Payload String payload,
             @Header(name = "kafka_receivedPartitionId", required = false) int partition,
-            @Header(name = "kafka_offset", required = false) long offset) {
+            @Header(name = "kafka_offset", required = false) long offset,
+            Acknowledgment ack) {
 
         log.debug("[CONSUME] Alert event received: partition={}, offset={}", partition, offset);
-        processNotificationEvent(payload, "alerts");
+        processNotificationEvent(payload, "alerts", ack);
     }
 
     /**
      * Process a notification event consumed from Kafka
      */
-    private void processNotificationEvent(String payload, String topic) {
+    private void processNotificationEvent(String payload, String topic, Acknowledgment ack) {
         try {
             // Deserialize JSON to domain object
             NotificationEvent event = objectMapper.readValue(payload, NotificationEvent.class);
@@ -120,10 +124,17 @@ public class NotificationKafkaConsumer {
                 // No need to republish to retry topic here
             }
 
+            // Ack only after a definitive outcome from the use case.
+            // Unexpected exceptions (deserialization errors, network failures, etc.)
+            // are deliberately left unacknowledged so the offset does not advance,
+            // allowing redelivery or future DLQ routing.
+            ack.acknowledge();
+
         } catch (Exception e) {
             log.error("[ERROR] Failed to process Kafka event: payload={}", payload, e);
-            // In a production system, we would send to a poisoned message queue
-            // For now, we just log and let Kafka advance the offset
+            // Offset is intentionally NOT acknowledged so the message will be
+            // redelivered on rebalance/restart. A future enhancement should route
+            // this to a DLQ topic after a retry threshold.
         }
     }
 }

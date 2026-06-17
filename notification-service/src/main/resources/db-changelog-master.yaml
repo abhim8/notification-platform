@@ -2,8 +2,6 @@ databaseChangeLog:
   - include:
       file: db/changelog/v1__create_schema.xml
   - include:
-      file: db/changelog/v2__create_delivery_attempts.xml
+      file: db/changelog/v2__create_notifications.xml
   - include:
-      file: db/changelog/v3__create_notifications.xml
-  - include:
-      file: db/changelog/v4__create_shedlock.xml
+      file: db/changelog/v3__create_shedlock.xml
