@@ -1,0 +1,489 @@
+{
+  "info": {
+    "_postman_id": "63fb319f-d69c-4c64-bd10-38206c4ff571",
+    "name": "Notification-Platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "23155045"
+  },
+  "item": [
+    {
+      "name": "delivery-tracker",
+      "item": [
+        {
+          "name": "Get Attempts by Event",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{delivery_tracker_url}}/api/v1/delivery-attempts/events/:eventId",
+              "host": [
+                "{{delivery_tracker_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "delivery-attempts",
+                "events",
+                ":eventId"
+              ],
+              "variable": [
+                {
+                  "key": "eventId",
+                  "value": "evt-001-20260617",
+                  "description": "The unique event identifier"
+                }
+              ]
+            },
+            "description": "Retrieves all delivery attempts for a specific event.\n\nResponse (200):\n```json\n[\n  {\n    \"id\": 1,\n    \"eventId\": \"evt-001-20250101\",\n    \"userId\": \"usr-42\",\n    \"eventType\": \"ORDER_PLACED\",\n    \"channel\": \"EMAIL\",\n    \"status\": \"DELIVERED\",\n    \"attemptNumber\": 1,\n    \"messageId\": \"msg-abc-123\",\n    \"errorMessage\": null,\n    \"createdAt\": \"2026-06-17T10:00:00\",\n    \"updatedAt\": \"2026-06-17T10:00:05\"\n  }\n]\n```\n\nResponse (404): No attempts found for the given event."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Attempts by Event and Channel",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{delivery_tracker_url}}/api/v1/delivery-attempts/events/:eventId/channels/:channel",
+              "host": [
+                "{{delivery_tracker_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "delivery-attempts",
+                "events",
+                ":eventId",
+                "channels",
+                ":channel"
+              ],
+              "variable": [
+                {
+                  "key": "eventId",
+                  "value": "evt-001-20260617",
+                  "description": "The unique event identifier"
+                },
+                {
+                  "key": "channel",
+                  "value": "EMAIL",
+                  "description": "Delivery channel (EMAIL, SMS, PUSH, WEBHOOK)"
+                }
+              ]
+            },
+            "description": "Retrieves all delivery attempts for a specific event and channel.\n\nResponse (200):\n```json\n[\n  {\n    \"id\": 1,\n    \"eventId\": \"evt-001-20250101\",\n    \"userId\": \"usr-42\",\n    \"eventType\": \"ORDER_PLACED\",\n    \"channel\": \"EMAIL\",\n    \"status\": \"DELIVERED\",\n    \"attemptNumber\": 1,\n    \"messageId\": \"msg-abc-123\",\n    \"errorMessage\": null,\n    \"createdAt\": \"2026-06-17T10:00:00\",\n    \"updatedAt\": \"2026-06-17T10:00:05\"\n  }\n]\n```\n\nResponse (404): No attempts found."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Attempt by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{delivery_tracker_url}}/api/v1/delivery-attempts/:attemptId",
+              "host": [
+                "{{delivery_tracker_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "delivery-attempts",
+                ":attemptId"
+              ],
+              "variable": [
+                {
+                  "key": "attemptId",
+                  "value": "1",
+                  "description": "The attempt ID (numeric)"
+                }
+              ]
+            },
+            "description": "Retrieves a single delivery attempt by its ID.\n\nResponse (200):\n```json\n{\n  \"id\": 1,\n  \"eventId\": \"evt-001-20250101\",\n  \"userId\": \"usr-42\",\n  \"eventType\": \"ORDER_PLACED\",\n  \"channel\": \"email\",\n  \"status\": \"DELIVERED\",\n  \"attemptNumber\": 1,\n  \"messageId\": \"msg-abc-123\",\n  \"errorMessage\": null,\n  \"createdAt\": \"2026-06-17T10:00:00\",\n  \"updatedAt\": \"2026-06-17T10:00:05\"\n}\n```\n\nResponse (404): Attempt not found."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Attempts by User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{delivery_tracker_url}}/api/v1/delivery-attempts/users/:userId",
+              "host": [
+                "{{delivery_tracker_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "delivery-attempts",
+                "users",
+                ":userId"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "usr-42",
+                  "description": "The user ID"
+                }
+              ]
+            },
+            "description": "Retrieves all delivery attempts for a specific user within the last 30 days.\n\nResponse (200):\n```json\n[\n  {\n    \"id\": 1,\n    \"eventId\": \"evt-001-20250101\",\n    \"userId\": \"usr-42\",\n    \"eventType\": \"ORDER_PLACED\",\n    \"channel\": \"EMAIL\",\n    \"status\": \"DELIVERED\",\n    \"attemptNumber\": 1,\n    \"messageId\": \"msg-abc-123\",\n    \"errorMessage\": null,\n    \"createdAt\": \"2026-06-17T10:00:00\",\n    \"updatedAt\": \"2026-06-17T10:00:05\"\n  }\n]\n```\n\nResponse (404): No attempts found for the user."
+          },
+          "response": []
+        },
+        {
+          "name": "Record Delivery Attempt",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"evt-001-20260617\",\n  \"userId\": \"usr-123\",\n  \"eventType\": \"ORDER_PLACED\",\n  \"channel\": \"EMAIL\",\n  \"status\": \"DELIVERED\",\n  \"attemptNumber\": 1,\n  \"messageId\": \"sendgrid_mock_evt-001-20260617_email\",\n  \"errorMessage\": null\n}"
+            },
+            "url": {
+              "raw": "{{delivery_tracker_url}}/api/v1/delivery-attempts",
+              "host": [
+                "{{delivery_tracker_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "delivery-attempts"
+              ]
+            },
+            "description": "Records a delivery attempt for a notification event.\n\nResponse (201 Created):\n```json\n{\n  \"id\": 1,\n  \"eventId\": \"evt-001-20260617\",\n  \"userId\": \"usr-123\",\n  \"eventType\": \"ORDER_PLACED\",\n  \"channel\": \"EMAIL\",\n  \"status\": \"DELIVERED\",\n  \"attemptNumber\": 1,\n  \"messageId\": \"sendgrid_mock_evt-001-20260617_email\",\n  \"errorMessage\": null,\n  \"createdAt\": \"2026-06-17T10:00:00\",\n  \"updatedAt\": \"2026-06-17T10:00:00\"\n}\n```\n\nResponse (400): Invalid request body."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Failed Attempts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{delivery_tracker_url}}/api/v1/delivery-attempts/failed?since=2026-06-16T00:00:00Z&limit=100",
+              "host": [
+                "{{delivery_tracker_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "delivery-attempts",
+                "failed"
+              ],
+              "query": [
+                {
+                  "key": "since",
+                  "value": "2026-06-16T00:00:00Z",
+                  "description": "ISO-8601 timestamp \u2014 only attempts updated after this time are returned. Defaults to 24 hours ago."
+                },
+                {
+                  "key": "limit",
+                  "value": "100",
+                  "description": "Maximum number of attempts to return. Default: 100."
+                }
+              ]
+            },
+            "description": "Retrieves failed delivery attempts for retry processing, ordered by oldest update first.\n\nResponse (200):\n```json\n[\n  {\n    \"id\": 2,\n    \"eventId\": \"evt-002-20250101\",\n    \"userId\": \"usr-99\",\n    \"eventType\": \"ORDER_PLACED\",\n    \"channel\": \"SMS\",\n    \"status\": \"FAILED\",\n    \"attemptNumber\": 1,\n    \"messageId\": null,\n    \"errorMessage\": \"Provider unavailable\",\n    \"createdAt\": \"2026-06-17T11:00:00\",\n    \"updatedAt\": \"2026-06-17T11:00:03\"\n  }\n]\n```"
+          },
+          "response": []
+        }
+      ],
+      "description": "REST API for recording and querying delivery attempt history.\n\nBase URL: {{delivery_tracker_url}} (default: http://localhost:8003)"
+    },
+    {
+      "name": "template-service",
+      "item": [
+        {
+          "name": "Get All Templates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{template_service_url}}/api/v1/templates",
+              "host": [
+                "{{template_service_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "templates"
+              ]
+            },
+            "description": "Retrieves all templates in the database.\n\nResponse (200):\n```json\n[\n  {\n    \"id\": \"order-confirm\",\n    \"eventType\": \"ORDER_PLACED\",\n    \"name\": \"Order Confirmation\",\n    \"subject\": \"Your Order #{{orderId}} Confirmed\",\n    \"body\": \"Thank you for your order {{orderId}}. Total: ${{amount}}\",\n    \"version\": 1,\n    \"active\": true,\n    \"createdAt\": \"2026-01-01T00:00:00\",\n    \"updatedAt\": \"2026-06-17T12:00:00\"\n  },\n  {\n    \"id\": \"password-reset\",\n    \"eventType\": \"PASSWORD_RESET\",\n    \"name\": \"Password Reset\",\n    \"subject\": \"Reset Your Password\",\n    \"body\": \"Click the link to reset your password: {{resetLink}}\",\n    \"version\": 1,\n    \"active\": true,\n    \"createdAt\": \"2026-01-01T00:00:00\",\n    \"updatedAt\": \"2026-06-17T12:00:00\"\n  }\n]\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Template by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{template_service_url}}/api/v1/templates/:templateId",
+              "host": [
+                "{{template_service_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "templates",
+                ":templateId"
+              ],
+              "variable": [
+                {
+                  "key": "templateId",
+                  "value": "order-confirm",
+                  "description": "The template ID (e.g., order-confirm, password-reset)"
+                }
+              ]
+            },
+            "description": "Retrieves a template by ID without rendering.\n\nResponse (200):\n```json\n{\n  \"id\": \"order-confirm\",\n  \"eventType\": \"ORDER_PLACED\",\n  \"name\": \"Order Confirmation\",\n  \"subject\": \"Your Order #{{orderId}} Confirmed\",\n  \"body\": \"Thank you for your order {{orderId}}. Total: ${{amount}}\",\n  \"version\": 1,\n  \"active\": true,\n  \"createdAt\": \"2026-01-01T00:00:00\",\n  \"updatedAt\": \"2026-06-17T12:00:00\"\n}\n```\n\nResponse (404): Template not found."
+          },
+          "response": []
+        },
+        {
+          "name": "Render Template",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"ord-789\",\n  \"amount\": \"99.99\"\n}"
+            },
+            "url": {
+              "raw": "{{template_service_url}}/api/v1/templates/:templateId/render",
+              "host": [
+                "{{template_service_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "templates",
+                ":templateId",
+                "render"
+              ],
+              "variable": [
+                {
+                  "key": "templateId",
+                  "value": "order-confirm",
+                  "description": "The template ID (e.g., order-confirm, password-reset)"
+                }
+              ]
+            },
+            "description": "Retrieves a template and renders it with the provided payload.\n\nResponse (200):\n```json\n{\n  \"templateId\": \"order-confirm\",\n  \"content\": \"Your Order #ord-789 Confirmed\\n\\nThank you for your order ord-789. Total: $99.99\"\n}\n```\n\nResponse (404): Template not found.\nResponse (400): Invalid payload or missing required variables."
+          },
+          "response": []
+        },
+        {
+          "name": "Check Template Exists",
+          "request": {
+            "method": "HEAD",
+            "header": [],
+            "url": {
+              "raw": "{{template_service_url}}/api/v1/templates/:templateId",
+              "host": [
+                "{{template_service_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "templates",
+                ":templateId"
+              ],
+              "variable": [
+                {
+                  "key": "templateId",
+                  "value": "order-confirm",
+                  "description": "The template ID (e.g., order-confirm, password-reset)"
+                }
+              ]
+            },
+            "description": "Checks whether a template exists and is active.\n\nHTTP 200: Template exists and is active.\nHTTP 404: Template not found or inactive."
+          },
+          "response": []
+        }
+      ],
+      "description": "REST API for retrieving and rendering notification templates.\n\nBase URL: {{template_service_url}} (default: http://localhost:8002)"
+    },
+    {
+      "name": "notification-service",
+      "item": [
+        {
+          "name": "Send Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": \"evt-001-20260617\",\n  \"eventType\": \"ORDER_PLACED\",\n  \"userId\": \"usr-123\",\n  \"channels\": [\"EMAIL\", \"SMS\"],\n  \"templateId\": \"order-confirm\",\n  \"payload\": {\n    \"orderId\": \"ord-789\",\n    \"amount\": 99.99,\n    \"email_recipient\": \"user@example.com\",\n    \"sms_recipient\": \"+1234567890\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{notification_service_url}}/api/v1/notifications",
+              "host": [
+                "{{notification_service_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications"
+              ]
+            },
+            "description": "Sends a notification to specified channels. Dispatches synchronously using the channel adapters.\n\nRequired fields: eventId, eventType, userId, channels (non-empty array), templateId.\nOptional: payload (map of data for template rendering).\n\nValid EventTypes: ORDER_PLACED, ORDER_SHIPPED, ORDER_DELIVERED, PAYMENT_FAILED, PASSWORD_RESET, ACCOUNT_CREATED, USER_INVITED, PROMOTION_ALERT, FRAUD_ALERT, SYSTEM_ALERT\n\nValid Channels: EMAIL, SMS, PUSH, WEBHOOK\n\nResponse (200):\n```json\n{\n  \"eventId\": \"evt-001-20260617\",\n  \"success\": true,\n  \"status\": \"success\",\n  \"message\": \"Notification sent successfully\",\n  \"channelResults\": {\n    \"EMAIL\": {\n      \"success\": true,\n      \"messageId\": \"sendgrid_mock_evt-001-20260617_email\",\n      \"errorMessage\": null\n    },\n    \"SMS\": {\n      \"success\": true,\n      \"messageId\": \"twilio_mock_evt-001-20260617_sms\",\n      \"errorMessage\": null\n    }\n  }\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Delivery Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{notification_service_url}}/api/v1/notifications/:eventId",
+              "host": [
+                "{{notification_service_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                ":eventId"
+              ],
+              "variable": [
+                {
+                  "key": "eventId",
+                  "value": "evt-001-20260617",
+                  "description": "The unique event identifier"
+                }
+              ]
+            },
+            "description": "Retrieves the high-level delivery status for a notification event.\n\nFor detailed per-channel delivery attempts, query the delivery-tracker service directly using the eventId.\n\nResponse (200):\n```json\n{\n  \"eventId\": \"evt-001-20260617\",\n  \"status\": \"DELIVERED\",\n  \"message\": \"Event has been processed. Query delivery-tracker service for detailed per-channel status.\"\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Delivery Attempts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{notification_service_url}}/api/v1/notifications/:eventId/attempts",
+              "host": [
+                "{{notification_service_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                ":eventId",
+                "attempts"
+              ],
+              "variable": [
+                {
+                  "key": "eventId",
+                  "value": "evt-001-20260617",
+                  "description": "The unique event identifier"
+                }
+              ]
+            },
+            "description": "Gets a link to query delivery attempts from the delivery-tracker service.\n\nResponse (200):\n```json\n{\n  \"eventId\": \"evt-001-20260617\",\n  \"message\": \"Query delivery-tracker service at http://localhost:8003/api/v1/delivery-attempts/events/evt-001-20260617\",\n  \"url\": \"http://localhost:8003/api/v1/delivery-attempts/events/evt-001-20260617\"\n}\n```"
+          },
+          "response": []
+        }
+      ],
+      "description": "REST API for sending notifications, retrieving delivery status, and querying delivery attempts.\n\nBase URL: {{notification_service_url}} (default: http://localhost:8001)"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "delivery_tracker_url",
+      "value": "http://localhost:8003",
+      "type": "string"
+    },
+    {
+      "key": "eventId",
+      "value": "evt-001-20260617",
+      "type": "string",
+      "description": "Unique event identifier"
+    },
+    {
+      "key": "channel",
+      "value": "EMAIL",
+      "type": "string",
+      "description": "Delivery channel - valid values: EMAIL, SMS, PUSH, WEBHOOK"
+    },
+    {
+      "key": "attemptId",
+      "value": "1",
+      "type": "string",
+      "description": "Attempt ID (numeric)"
+    },
+    {
+      "key": "userId",
+      "value": "usr-123",
+      "type": "string",
+      "description": "User ID"
+    },
+    {
+      "key": "template_service_url",
+      "value": "http://localhost:8002",
+      "type": "string"
+    },
+    {
+      "key": "templateId",
+      "value": "order-confirm",
+      "type": "string",
+      "description": "Template ID - valid values: order-confirm, order-shipped, order-delivered, payment-failed, password-reset, account-created, user-invited, promotion-alert, fraud-alert, system-alert"
+    },
+    {
+      "key": "notification_service_url",
+      "value": "http://localhost:8001",
+      "type": "string"
+    },
+    {
+      "key": "eventId",
+      "value": "evt-001-20260617",
+      "type": "string",
+      "description": "Unique event identifier for the notification"
+    }
+  ]
+}
