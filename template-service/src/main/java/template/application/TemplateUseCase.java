@@ -14,11 +14,11 @@ import java.util.Map;
  */
 @Service
 @Slf4j
-public class GetTemplateUseCase {
+public class TemplateUseCase {
 
     private final TemplateRepository repository;
 
-    public GetTemplateUseCase(TemplateRepository repository) {
+    public TemplateUseCase(TemplateRepository repository) {
         this.repository = repository;
     }
 

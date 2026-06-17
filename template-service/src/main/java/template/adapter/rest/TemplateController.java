@@ -5,12 +5,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import template.adapter.rest.dto.TemplateResponse;
-import template.application.GetTemplateUseCase;
+import template.application.TemplateUseCase;
 import template.application.TemplateNotFoundException;
 import template.domain.Template;
 
@@ -23,12 +24,9 @@ import java.util.Map;
 @RequestMapping("/api/v1/templates")
 @Tag(name = "Templates", description = "Notification template management")
 @Slf4j
+@RequiredArgsConstructor
 public class TemplateController {
-    private final GetTemplateUseCase getTemplateUseCase;
-
-    public TemplateController(GetTemplateUseCase getTemplateUseCase) {
-        this.getTemplateUseCase = getTemplateUseCase;
-    }
+    private final TemplateUseCase templateUseCase;
 
     /**
      * Get a template by ID
@@ -46,7 +44,7 @@ public class TemplateController {
         try {
             log.debug("GET /api/v1/templates/{} ", templateId);
 
-            Template template = getTemplateUseCase.getTemplate(templateId);
+            Template template = templateUseCase.getTemplate(templateId);
 
             TemplateResponse response = new TemplateResponse(
                     template.id(),
@@ -94,13 +92,13 @@ public class TemplateController {
                 payload = Map.of();
             }
 
-            String rendered = getTemplateUseCase.getAndRenderTemplate(templateId, payload);
+            String rendered = templateUseCase.getAndRenderTemplate(templateId, payload);
 
             RenderResponse response = new RenderResponse(templateId, rendered);
             return ResponseEntity.ok(response);
 
         } catch (TemplateNotFoundException e) {
-            log.warn("Template not found: {}", templateId);
+            log.warn("Template not found : {}", templateId);
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
             log.error("Error rendering template: {}", templateId, e);
@@ -121,7 +119,7 @@ public class TemplateController {
             @Parameter(description = "Template ID", required = true)
             @PathVariable String templateId) {
 
-        if (getTemplateUseCase.templateExists(templateId)) {
+        if (templateUseCase.templateExists(templateId)) {
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();

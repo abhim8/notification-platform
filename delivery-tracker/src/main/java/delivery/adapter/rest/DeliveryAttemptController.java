@@ -1,21 +1,21 @@
 package delivery.adapter.rest;
 
 import delivery.adapter.postgres.entity.DeliveryAttemptEntity;
-import delivery.adapter.postgres.repository.DeliveryAttemptEntityRepository;
 import delivery.adapter.rest.dto.CreateDeliveryAttemptRequest;
 import delivery.adapter.rest.dto.DeliveryAttemptResponse;
+import delivery.application.CreateAttemptCommand;
+import delivery.application.DeliveryAttemptUseCase;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.ZonedDateTime;
 import java.util.List;
 
 /**
@@ -25,13 +25,10 @@ import java.util.List;
 @RequestMapping("/api/v1/delivery-attempts")
 @Tag(name = "Delivery Attempts", description = "Delivery attempt tracking and history")
 @Slf4j
+@RequiredArgsConstructor
 public class DeliveryAttemptController {
 
-    private final DeliveryAttemptEntityRepository repository;
-
-    public DeliveryAttemptController(DeliveryAttemptEntityRepository repository) {
-        this.repository = repository;
-    }
+    private final DeliveryAttemptUseCase useCase;
 
     /**
      * Get all delivery attempts for an event
@@ -49,7 +46,7 @@ public class DeliveryAttemptController {
         try {
             log.debug("GET /api/v1/delivery-attempts/events/{}", eventId);
 
-            List<DeliveryAttemptEntity> attempts = repository.findByEventId(eventId);
+            List<DeliveryAttemptEntity> attempts = useCase.getAttemptsByEvent(eventId);
 
             if (attempts.isEmpty()) {
                 return ResponseEntity.notFound().build();
@@ -85,7 +82,7 @@ public class DeliveryAttemptController {
         try {
             log.debug("GET /api/v1/delivery-attempts/events/{}/channels/{}", eventId, channel);
 
-            List<DeliveryAttemptEntity> attempts = repository.findByEventIdAndChannel(eventId, channel);
+            List<DeliveryAttemptEntity> attempts = useCase.getAttemptsByEventAndChannel(eventId, channel);
 
             if (attempts.isEmpty()) {
                 return ResponseEntity.notFound().build();
@@ -119,7 +116,7 @@ public class DeliveryAttemptController {
         try {
             log.debug("GET /api/v1/delivery-attempts/{}", attemptId);
 
-            return repository.findById(attemptId)
+            return useCase.getAttemptById(attemptId)
                     .map(this::toResponse)
                     .map(ResponseEntity::ok)
                     .orElse(ResponseEntity.notFound().build());
@@ -144,10 +141,9 @@ public class DeliveryAttemptController {
             @PathVariable String userId) {
 
         try {
-            log.debug("GET /api/v1/delivery-attempts/users/{}", userId);
+            log.debug("GET /api/v1/delivery-attempts/users/{}/", userId);
 
-            List<DeliveryAttemptEntity> attempts = repository.findByUserIdAndCreatedAtAfter(
-                    userId, java.time.ZonedDateTime.now().minusDays(30));
+            List<DeliveryAttemptEntity> attempts = useCase.getAttemptsByUser(userId);
 
             if (attempts.isEmpty()) {
                 return ResponseEntity.notFound().build();
@@ -181,20 +177,13 @@ public class DeliveryAttemptController {
         try {
             log.debug("POST /api/v1/delivery-attempts");
 
-            DeliveryAttemptEntity entity = new DeliveryAttemptEntity(
-                    request.eventId(),
-                    request.userId(),
-                    request.eventType(),
-                    request.channel(),
-                    request.status(),
-                    request.attemptNumber()
+            CreateAttemptCommand command = new CreateAttemptCommand(
+                    request.eventId(), request.userId(), request.eventType(),
+                    request.channel(), request.status(), request.attemptNumber(),
+                    request.messageId(), request.errorMessage()
             );
-            entity.setMessageId(request.messageId());
-            entity.setErrorMessage(request.errorMessage());
 
-            DeliveryAttemptEntity saved = repository.save(entity);
-
-            log.debug("Delivery attempt saved: id={}, eventId={}", saved.getId(), saved.getEventId());
+            DeliveryAttemptEntity saved = useCase.createAttempt(command);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(saved));
 
@@ -221,13 +210,7 @@ public class DeliveryAttemptController {
         try {
             log.debug("GET /api/v1/delivery-attempts/failed");
 
-            ZonedDateTime cutoff = since != null
-                    ? ZonedDateTime.parse(since)
-                    : ZonedDateTime.now().minusDays(1);
-
-            List<DeliveryAttemptEntity> attempts = repository
-                    .findByStatusAndUpdatedAtAfterOrderByUpdatedAtAsc(
-                            "FAILED", cutoff, PageRequest.of(0, limit));
+            List<DeliveryAttemptEntity> attempts = useCase.getFailedAttempts(since, limit);
 
             List<DeliveryAttemptResponse> responses = attempts.stream()
                     .map(this::toResponse)
