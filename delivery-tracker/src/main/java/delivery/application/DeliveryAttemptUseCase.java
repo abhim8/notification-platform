@@ -8,7 +8,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.notification.common.exception.BadRequestException;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,9 +61,23 @@ public class DeliveryAttemptUseCase {
 
     public List<DeliveryAttemptEntity> getFailedAttempts(String since, int limit) {
         LocalDateTime cutoff = since != null
-                ? LocalDateTime.parse(since)
+                ? parseDateTime(since)
                 : LocalDateTime.now().minusDays(1);
         return repository.findByStatusAndUpdatedAtAfterOrderByUpdatedAtAsc(
                 DeliveryStatus.FAILED, cutoff, PageRequest.of(0, limit));
+    }
+
+    private static LocalDateTime parseDateTime(String value) {
+        try {
+            return LocalDateTime.parse(value);
+        } catch (DateTimeParseException e) {
+            try {
+                return OffsetDateTime.parse(value).toLocalDateTime();
+            } catch (DateTimeParseException ex) {
+                throw new BadRequestException(
+                        "Invalid date format: '" + value
+                        + "'. Expected ISO-8601 format (e.g., 2026-06-16T00:00:00 or 2026-06-16T00:00:00Z)");
+            }
+        }
     }
 }

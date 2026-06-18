@@ -1,5 +1,8 @@
 package com.notification.common.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum EventType {
     ORDER_PLACED("order-confirm"),
     ORDER_SHIPPED("order-shipped"),
@@ -18,7 +21,24 @@ public enum EventType {
         this.defaultTemplateId = defaultTemplateId;
     }
 
+    @JsonValue
     public String getDefaultTemplateId() {
         return defaultTemplateId;
+    }
+
+    @JsonCreator
+    public static EventType fromString(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        for (EventType eventType : EventType.values()) {
+            if (eventType.name().equalsIgnoreCase(value)) {
+                return eventType;
+            }
+            if (eventType.defaultTemplateId.equalsIgnoreCase(value)) {
+                return eventType;
+            }
+        }
+        throw new IllegalArgumentException("Unknown EventType: " + value);
     }
 }

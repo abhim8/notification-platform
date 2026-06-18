@@ -2,7 +2,9 @@ package notification.adapter.channels.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import notification.adapter.channels.email.SendGridAdapter;
 import notification.adapter.channels.push.FcmAdapter;
 import notification.adapter.channels.sms.TwilioAdapter;
@@ -10,6 +12,7 @@ import notification.adapter.channels.webhook.WebhookAdapter;
 import com.notification.common.domain.Channel;
 import notification.domain.channel.ChannelDispatcher;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,13 +26,21 @@ public class ChannelDispatcherConfig {
     /**
      * RestTemplate bean for all outbound HTTP calls.
      * Configured with sensible connect/read timeouts.
+     * Defense-in-depth: removes any XML message converters to ensure
+     * JSON is always the default serialization format for REST communication.
      */
     @Bean
-    public RestTemplate restTemplate() {
-        var factory = new org.springframework.http.client.SimpleClientHttpRequestFactory();
-        factory.setConnectTimeout(5000);
-        factory.setReadTimeout(10000);
-        return new RestTemplate(factory);
+    public RestTemplate restTemplate(RestTemplateBuilder builder) {
+        RestTemplate restTemplate = builder
+                .setConnectTimeout(Duration.ofSeconds(5))
+                .setReadTimeout(Duration.ofSeconds(10))
+                .build();
+
+        restTemplate.getMessageConverters().removeIf(
+                c -> c instanceof MappingJackson2XmlHttpMessageConverter
+        );
+
+        return restTemplate;
     }
 
     /**
