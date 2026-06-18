@@ -2,9 +2,14 @@ name: Build
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
+
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -16,9 +21,9 @@ jobs:
       - name: Set up JDK 23 (Temurin)
         uses: actions/setup-java@v4
         with:
-          java-version: 23
+          java-version: '23'
           distribution: temurin
           cache: maven
 
       - name: Build and verify
-        run: mvn clean verify --batch-mode
+        run: mvn --batch-mode clean verify
