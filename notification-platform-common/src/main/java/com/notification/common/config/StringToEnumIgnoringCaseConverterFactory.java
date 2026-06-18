@@ -9,7 +9,7 @@ public class StringToEnumIgnoringCaseConverterFactory implements ConverterFactor
     public <T extends Enum> Converter<String, T> getConverter(Class<T> targetType) {
         return new StringToEnumIgnoringCaseConverter<>(targetType);
     }
-
+   // Testing pr flow
     private static class StringToEnumIgnoringCaseConverter<T extends Enum> implements Converter<String, T> {
         private final Class<T> enumType;
 
