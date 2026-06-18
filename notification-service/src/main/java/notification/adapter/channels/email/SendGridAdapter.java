@@ -27,6 +27,11 @@ public class SendGridAdapter implements ChannelDispatcher {
     @Override
     public DispatchResult dispatch(NotificationEvent event, String recipient, String content) {
         try {
+            // Validate recipient
+            if (recipient == null || recipient.isBlank()) {
+                return DispatchResult.failure("Email recipient is required");
+            }
+
             // Extract email subject from payload if available, else use event type
             String subject = event.payload().getOrDefault("subject",
                     "Notification - " + event.eventType()).toString();

@@ -1,31 +1,27 @@
 package com.notification.common.handler;
 
+import com.notification.common.config.MdcFilter;
 import com.notification.common.dto.ErrorResponse;
 import com.notification.common.dto.ValidationError;
-import com.notification.common.exception.BadRequestException;
-import com.notification.common.exception.ConflictException;
-import com.notification.common.exception.InternalServerException;
-import com.notification.common.exception.NotFoundException;
-import com.notification.common.exception.UnauthorizedException;
+import com.notification.common.exception.*;
 import jakarta.servlet.http.HttpServletRequest;
-import com.notification.common.config.MdcFilter;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import org.springframework.core.convert.ConversionFailedException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -132,6 +128,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMessageConversion(HttpMessageConversionException ex, HttpServletRequest request) {
         log.warn("Message conversion error: {}", ex.getMessage());
         return buildResponse(HttpStatus.BAD_REQUEST, "Invalid request format", request, null);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
+        log.warn("Invalid request: {}", ex.getMessage());
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request, null);
     }
 
     @ExceptionHandler(Exception.class)

@@ -131,10 +131,11 @@ public class NotificationKafkaConsumer {
             ack.acknowledge();
 
         } catch (Exception e) {
-            log.error("[ERROR] Failed to process Kafka event: payload={}", payload, e);
+            log.error("[ERROR] Failed to process Kafka event: payload={}, errorType={}", payload, e.getClass().getSimpleName(), e);
             // Offset is intentionally NOT acknowledged so the message will be
-            // redelivered on rebalance/restart. A future enhancement should route
-            // this to a DLQ topic after a retry threshold.
+            // redelivered on rebalance/restart. In production, a retry threshold
+            // should route the message to a DLQ topic after N failures to avoid
+            // blocking the partition.
         }
     }
 }

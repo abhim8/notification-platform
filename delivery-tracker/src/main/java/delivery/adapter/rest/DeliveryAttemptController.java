@@ -1,7 +1,6 @@
 package delivery.adapter.rest;
 
 import com.notification.common.domain.Channel;
-import com.notification.common.exception.BadRequestException;
 import com.notification.common.exception.NotFoundException;
 import delivery.adapter.postgres.entity.DeliveryAttemptEntity;
 import delivery.adapter.rest.dto.CreateDeliveryAttemptRequest;
@@ -45,10 +44,6 @@ public class DeliveryAttemptController {
 
         List<DeliveryAttemptEntity> attempts = useCase.getAttemptsByEvent(eventId);
 
-        if (attempts.isEmpty()) {
-            throw new NotFoundException("No delivery attempts found for event: " + eventId);
-        }
-
         List<DeliveryAttemptResponse> responses = attempts.stream()
                 .map(this::toResponse)
                 .toList();
@@ -72,10 +67,6 @@ public class DeliveryAttemptController {
 
 
         List<DeliveryAttemptEntity> attempts = useCase.getAttemptsByEventAndChannel(eventId, channel);
-
-        if (attempts.isEmpty()) {
-            throw new NotFoundException("No delivery attempts found for event: " + eventId + " and channel: " + channel);
-        }
 
         List<DeliveryAttemptResponse> responses = attempts.stream()
                 .map(this::toResponse)
@@ -115,10 +106,6 @@ public class DeliveryAttemptController {
         log.debug("GET /api/v1/delivery-attempts/users/{}/", userId);
 
         List<DeliveryAttemptEntity> attempts = useCase.getAttemptsByUser(userId);
-
-        if (attempts.isEmpty()) {
-            throw new NotFoundException("No delivery attempts found for user: " + userId);
-        }
 
         List<DeliveryAttemptResponse> responses = attempts.stream()
                 .map(this::toResponse)
