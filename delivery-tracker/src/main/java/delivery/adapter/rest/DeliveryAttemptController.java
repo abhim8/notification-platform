@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -144,8 +146,8 @@ public class DeliveryAttemptController {
     public ResponseEntity<List<DeliveryAttemptResponse>> getFailedAttempts(
             @Parameter(description = "Only attempts updated after this timestamp (ISO-8601)")
             @RequestParam(required = false) String since,
-            @Parameter(description = "Maximum number of attempts to return")
-            @RequestParam(defaultValue = "100") int limit) {
+            @Parameter(description = "Maximum number of attempts to return (max 1000)")
+            @RequestParam(defaultValue = "100") @Max(1000) @Min(1) int limit) {
 
         log.debug("GET /api/v1/delivery-attempts/failed");
 

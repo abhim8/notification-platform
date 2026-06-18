@@ -36,6 +36,8 @@ public class TemplateServiceClient implements TemplateResolver {
         } catch (HttpClientErrorException.NotFound e) {
             log.warn("[TEMPLATE] Template not found via REST: templateId={}", templateId);
             throw new TemplateResolutionException("Template not found: " + templateId, e);
+        } catch (TemplateResolutionException e) {
+            throw e;
         } catch (Exception e) {
             log.error("[TEMPLATE] Failed to resolve template via REST: templateId={}", templateId, e);
             throw new TemplateResolutionException("Failed to resolve template: " + templateId, e);

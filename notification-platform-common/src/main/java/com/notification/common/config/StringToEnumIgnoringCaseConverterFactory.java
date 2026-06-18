@@ -18,6 +18,7 @@ public class StringToEnumIgnoringCaseConverterFactory implements ConverterFactor
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public T convert(String source) {
             if (source == null || source.isBlank()) {
                 return null;

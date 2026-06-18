@@ -41,7 +41,7 @@ public class TemplateEntity {
     private Integer version;
 
     @Column(name = "active", nullable = false)
-    private Boolean active;
+    private boolean active;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

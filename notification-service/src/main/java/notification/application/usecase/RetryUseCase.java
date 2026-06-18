@@ -6,10 +6,14 @@ import notification.application.service.FailedDeliveryLoader;
 import com.notification.common.domain.Channel;
 import com.notification.common.domain.EventType;
 import com.notification.common.domain.DeliveryStatus;
+import notification.domain.event.NotificationEvent;
 import notification.domain.model.RetryPolicy;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Use case for retrying failed notification deliveries.
@@ -44,6 +48,7 @@ public class RetryUseCase {
      *
      * @return count of retries attempted
      */
+    @Transactional
     public RetryResult execute() {
         log.info("[RETRY] Starting retry scheduler");
 
@@ -100,6 +105,22 @@ public class RetryUseCase {
                     null,
                     null
             ));
+
+            // Actually re-dispatch the notification
+            try {
+                NotificationEvent retryEvent = NotificationEvent.create(
+                        delivery.eventId(),
+                        delivery.eventType(),
+                        delivery.userId(),
+                        List.of(delivery.channel()),
+                        delivery.eventType().getDefaultTemplateId(),
+                        Map.of()
+                );
+                sendNotificationUseCase.execute(retryEvent);
+            } catch (Exception e) {
+                log.warn("[RETRY] Re-dispatch failed: eventId={}, channel={}", delivery.eventId(), delivery.channel(), e);
+            }
+
             retryCount++;
         }
 

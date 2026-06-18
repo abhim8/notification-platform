@@ -75,7 +75,7 @@ public class NotificationKafkaProducer {
                     .build();
 
             kafkaTemplate.send(message).whenComplete((result, ex) -> {
-                if (ex == null) {
+                if (ex == null && result != null && result.getRecordMetadata() != null) {
                     log.debug("[PUBLISHED] Event published to topic={}: eventId={}, partition={}, offset={}",
                             topic, event.eventId(),
                             result.getRecordMetadata().partition(),

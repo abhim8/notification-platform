@@ -35,7 +35,7 @@ public class TemplatePersistenceAdapter implements TemplateRepository {
         return new Template(
                 entity.getId(), entity.getEventType(), entity.getName(),
                 entity.getSubject(), entity.getBody(), entity.getVersion(),
-                entity.getActive(), entity.getCreatedAt(), entity.getUpdatedAt()
+                entity.isActive(), entity.getCreatedAt(), entity.getUpdatedAt()
         );
     }
 }

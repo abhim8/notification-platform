@@ -9,7 +9,6 @@ import notification.domain.channel.ChannelDispatcher;
 import notification.domain.channel.DispatchResult;
 import notification.domain.event.NotificationEvent;
 import com.notification.common.domain.DeliveryStatus;
-
 import java.util.HashMap;
 import java.util.Map;
 

@@ -75,7 +75,7 @@ public class WebhookAdapter implements ChannelDispatcher {
             return DispatchResult.failure("Webhook dispatch failed: " + e.getMessage());
         } catch (Exception e) {
             log.error("[ERROR][WEBHOOK] Failed to send webhook: recipient={}, eventId={}",
-                    recipient, event.eventId(), e);
+                    maskUrl(recipient), event.eventId(), e);
             return DispatchResult.failure("Webhook dispatch failed: " + e.getMessage());
         }
     }

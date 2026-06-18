@@ -100,6 +100,20 @@
             <column name="attempt_number"/>
         </createIndex>
 
+        <!-- Composite index for retry query: findByStatusAndUpdatedAtAfterOrderByUpdatedAtAsc -->
+        <createIndex
+                tableName="delivery_attempts"
+                indexName="idx_status_updated_at">
+            <column name="status"/>
+            <column name="updated_at"/>
+        </createIndex>
+
+        <!-- Unique constraint to prevent duplicate delivery attempt records -->
+        <addUniqueConstraint
+                tableName="delivery_attempts"
+                constraintName="uq_event_channel_attempt"
+                columnNames="event_id, channel, attempt_number"/>
+
     </changeSet>
 
 </databaseChangeLog>

@@ -6,7 +6,9 @@ import com.notification.common.domain.Channel;
 import com.notification.common.domain.DeliveryStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.notification.common.exception.BadRequestException;
 import java.time.LocalDateTime;
@@ -20,6 +22,9 @@ import java.util.Optional;
 public class DeliveryAttemptUseCase {
 
     private final DeliveryAttemptEntityRepository repository;
+
+    @Value("${delivery-tracker.user-attempts-window-days:30}")
+    private int userAttemptsWindowDays;
 
     public DeliveryAttemptUseCase(DeliveryAttemptEntityRepository repository) {
         this.repository = repository;
@@ -41,9 +46,10 @@ public class DeliveryAttemptUseCase {
 
     public List<DeliveryAttemptEntity> getAttemptsByUser(String userId) {
         log.debug("Fetching attempts for user: {}", userId);
-        return repository.findByUserIdAndCreatedAtAfter(userId, LocalDateTime.now().minusDays(30));
+        return repository.findByUserIdAndCreatedAtAfter(userId, LocalDateTime.now().minusDays(userAttemptsWindowDays));
     }
 
+    @Transactional
     public DeliveryAttemptEntity createAttempt(CreateAttemptCommand command) {
         log.debug("Creating delivery attempt: eventId={}, channel={}", command.eventId(), command.channel());
 
@@ -64,7 +70,7 @@ public class DeliveryAttemptUseCase {
                 ? parseDateTime(since)
                 : LocalDateTime.now().minusDays(1);
         return repository.findByStatusAndUpdatedAtAfterOrderByUpdatedAtAsc(
-                DeliveryStatus.FAILED, cutoff, PageRequest.of(0, limit));
+                DeliveryStatus.FAILED, cutoff, PageRequest.of(0, Math.clamp(limit, 1, 1000)));
     }
 
     private static LocalDateTime parseDateTime(String value) {

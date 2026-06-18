@@ -33,7 +33,7 @@ public class RedisDeduplicationService implements DeduplicationService {
             String key = DEDUP_KEY_PREFIX + eventId;
             Boolean exists = redisTemplate.hasKey(key);
 
-            if (Boolean.TRUE.equals(exists)) {
+            if (exists) {
                 log.debug("[DEDUP] Event found in cache: eventId={}", eventId);
                 return true;
             }

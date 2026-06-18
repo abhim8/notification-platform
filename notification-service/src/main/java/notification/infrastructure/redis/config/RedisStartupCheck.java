@@ -13,8 +13,8 @@ public class RedisStartupCheck {
 
     @PostConstruct
     public void checkRedisConnection() {
-        try {
-            String pong = connectionFactory.getConnection().ping();
+        try (var connection = connectionFactory.getConnection()) {
+            String pong = connection.ping();
 
             if (!"PONG".equalsIgnoreCase(pong)) {
                 throw new IllegalStateException("Redis ping failed");

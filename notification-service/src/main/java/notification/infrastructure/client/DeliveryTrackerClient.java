@@ -36,6 +36,9 @@ public class DeliveryTrackerClient implements DeliveryAttemptRecorder, FailedDel
         } catch (Exception e) {
             log.error("[TRACKER] Failed to record delivery attempt via HTTP: eventId={}, channel={}",
                     attempt.eventId(), attempt.channel(), e);
+            // Re-throw as runtime so callers (e.g. SendNotificationUseCase) are aware of the failure
+            throw new RuntimeException("Failed to record delivery attempt: eventId="
+                    + attempt.eventId() + ", channel=" + attempt.channel(), e);
         }
     }
 
