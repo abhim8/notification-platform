@@ -201,6 +201,18 @@ export WEBHOOK_MAX_RETRIES=1
 export IDEMPOTENCY_TTL_HOURS=24
 ```
 
+## Documentation
+
+| Guide / Reference | Description |
+|---|---|
+| [`STARTUP_GUIDE.md`](./STARTUP_GUIDE.md) | End-to-end local setup and startup instructions |
+| [`CONTRIBUTING.md`](./CONTRIBUTING.md) | Contribution guidelines, branch naming, commit conventions |
+| [`SECURITY.md`](./SECURITY.md) | Security policy and vulnerability reporting |
+| [`notification-service/README.md`](./notification-service/README.md) | Notification Service documentation |
+| [`template-service/README.md`](./template-service/README.md) | Template Service documentation |
+| [`delivery-tracker/README.md`](./delivery-tracker/README.md) | Delivery Tracker documentation |
+| [`notification-platform-common/README.md`](./notification-platform-common/README.md) | Shared / Common module documentation |
+
 ## Overall Request Flow
 
 A notification request typically starts with a client sending a request to the `notification-service`. This service then orchestrates the entire process, including template resolution, channel-specific dispatch, and delivery attempt tracking, leveraging Kafka for resilience and asynchronous processing.
