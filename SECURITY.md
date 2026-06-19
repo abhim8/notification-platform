@@ -4,7 +4,7 @@
 
 Please **do not** report security vulnerabilities through public GitHub issues.
 
-Instead, send a private email to **abhilash@example.com** with:
+Instead, send a private email to **abhilash@gmail.com** with:
 
 - A description of the vulnerability
 - Steps to reproduce (if known)

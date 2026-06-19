@@ -104,7 +104,7 @@ Key configurations can be overridden via environment variables or `application.y
 |---|---|---|---|
 | Server Port | `DELIVERY_TRACKER_PORT` | 8003 | HTTP port for the service |
 | Database URL | `DB_HOST` | `jdbc:postgresql://localhost:5432/notification?currentSchema=notification_schema` | PostgreSQL connection string |
-| Database User | `DB_USER` | `abhilash` | PostgreSQL username |
+| Database User | `DB_USER` | `notif_user` | PostgreSQL username |
 | Database Password | `DB_PASSWORD` | (empty) | PostgreSQL password |
 
 Refer to the root `README.md` for a comprehensive list of all environment variables.

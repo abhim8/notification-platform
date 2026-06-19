@@ -78,7 +78,7 @@ The database schema (notification_schema) must be created manually before starti
 
 ```bash
 # Verify tables were created after starting services:
-psql -U abhilash -d notification -c "\dt notification_schema.*"
+psql -U notif_user -d notification -c "\dt notification_schema.*"
 # Should see: delivery_attempts, templates, shedlock, etc.
 ```
 
