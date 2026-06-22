@@ -24,13 +24,13 @@ Thanks for your interest in contributing to the Notification Platform.
 2.  Start each service:
 
     ```bash
-    # Terminal 1 — delivery-tracker (port 8003)
+    # Terminal 1 - delivery-tracker (port 8003)
     mvn spring-boot:run -pl delivery-tracker
 
-    # Terminal 2 — template-service (port 8002)
+    # Terminal 2 - template-service (port 8002)
     mvn spring-boot:run -pl template-service
 
-    # Terminal 3 — notification-service (port 8001)
+    # Terminal 3 - notification-service (port 8001)
     mvn spring-boot:run -pl notification-service
     ```
 
@@ -56,10 +56,10 @@ mvn clean test -pl notification-service
 
 Use a consistent prefix followed by a short description:
 
-- `feat/` — new features
-- `fix/` — bug fixes
-- `chore/` — tooling, CI, or dependency updates
-- `docs/` — documentation-only changes
+- `feat/` - new features
+- `fix/` - bug fixes
+- `chore/` - tooling, CI, or dependency updates
+- `docs/` - documentation-only changes
 
 Examples: `feat/add-sms-retry`, `fix/kafka-ack-timeout`.
 
