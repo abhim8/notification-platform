@@ -21,6 +21,12 @@ Explain why this change is needed. Link to any related issues or background cont
 - [ ] Integration tests pass
 - [ ] Manual verification (describe steps)
 
+## Breaking Changes
+
+<!--
+Does this change alter the request lifecycle, route definitions, authentication flow, or any existing behaviour?
+-->
+
 ## Checklist
 
 - [ ] Code follows the project's coding guidelines
