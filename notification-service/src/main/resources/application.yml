@@ -54,6 +54,7 @@ retry:
 
 server:
   port: ${SERVER_PORT:8001}
+  shutdown: graceful
 
 logging:
   level:

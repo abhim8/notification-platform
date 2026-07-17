@@ -26,6 +26,7 @@ spring:
 
 server:
   port: ${TEMPLATE_SERVICE_PORT:8002}
+  shutdown: graceful
 
 logging:
   level:
