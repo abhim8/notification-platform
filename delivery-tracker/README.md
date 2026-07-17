@@ -1,121 +1,82 @@
-# Delivery Tracker Service
+# Delivery Tracker
 
-This service is dedicated to recording and querying the history of all notification delivery attempts. It provides a persistent audit trail of how and when notifications were sent across all channels, supporting efficient queries by event ID, user ID, channel, and time range.
+[![Java](https://img.shields.io/badge/Java-23-blue?logo=openjdk)](https://adoptium.net/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.0-brightgreen?logo=spring)](https://spring.io/projects/spring-boot)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-316192?logo=postgresql)](https://www.postgresql.org/)
 
-## Purpose and Responsibilities
+> Dedicated service for recording and querying notification delivery attempts. Provides a persistent audit trail with support for event-, user-, and channel-based queries.
 
-*   **Delivery Attempt Recording:** Persists all notification delivery attempts to a PostgreSQL database.
-*   **Delivery History Retrieval:** Provides APIs to query delivery attempt history by various criteria (event ID, user ID, channel, time range).
-*   **Status Tracking:** Tracks the status of each delivery attempt (PENDING, DELIVERED, FAILED, RETRYING, DLQ, DROPPED).
-*   **Failed Attempt Identification:** Identifies failed attempts for the retry scheduler in the notification service.
-*   **Audit Trail:** Maintains a comprehensive history of all delivery operations for auditing and compliance purposes.
+**Port:** `8003` | **Navigation:** [Root](../README.md) · [Notification Service](../notification-service/README.md) · [Template Service](../template-service/README.md) · [Common](../notification-platform-common/README.md)
 
-## Public APIs
+---
 
-The Delivery Tracker Service exposes a REST API for recording and querying delivery attempts:
+## Project Overview
 
-*   **`POST /api/v1/delivery-attempts`**: Records a new delivery attempt.
-    *   **Request Body:** `delivery.adapter.rest.dto.DeliveryAttemptRequest`
-    *   **Response:** `delivery.adapter.rest.dto.DeliveryAttemptResponse` (HTTP 201 Created)
-    *   **Example Payload:**
-    ```json
-    {
-      "eventId": "evt_001",
-      "userId": "usr_123",
-      "eventType": "ORDER_PLACED",
-      "channel": "EMAIL",
-      "status": "DELIVERED",
-      "attemptNumber": 1,
-      "messageId": "sendgrid_msg_789",
-      "errorMessage": null
-    }
-    ```
+The Delivery Tracker is the persistence and query layer for all delivery attempt data. Every time a notification is dispatched through a channel, the result is recorded here. The service supports rich querying by event ID, user ID, channel, and time range, enabling audit, monitoring, and retry scheduling.
 
-*   **`GET /api/v1/delivery-attempts/{attemptId}`**: Retrieves a single delivery attempt by ID.
-    *   **Response:** `delivery.adapter.rest.dto.DeliveryAttemptResponse`
+### Responsibilities
 
-*   **`GET /api/v1/delivery-attempts/events/{eventId}`**: Retrieves all delivery attempts for a specific event.
-    *   **Response:** `List<DeliveryAttemptResponse>`
-    *   **Example:** `GET /api/v1/delivery-attempts/events/evt_001`
+| Responsibility | Description |
+|----------------|-------------|
+| Delivery Recording | Persists all notification delivery attempts to PostgreSQL |
+| History Queries | Provides APIs to query attempts by event, user, channel, and time range |
+| Status Tracking | Tracks delivery lifecycle: PENDING → DELIVERED / FAILED / RETRYING / DLQ / DROPPED |
+| Failed Attempt Detection | Identifies failed attempts for the Notification Service retry scheduler |
+| Audit Trail | Maintains comprehensive history for compliance and debugging |
 
-*   **`GET /api/v1/delivery-attempts/events/{eventId}/channels/{channel}`**: Retrieves delivery attempts for a specific event and channel.
-    *   **Response:** `List<DeliveryAttemptResponse>`
-    *   **Example:** `GET /api/v1/delivery-attempts/events/evt_001/channels/EMAIL`
+### Features
 
-*   **`GET /api/v1/delivery-attempts/users/{userId}`**: Retrieves all delivery attempts for a specific user.
-    *   **Response:** `List<DeliveryAttemptResponse>`
-    *   **Example:** `GET /api/v1/delivery-attempts/users/usr_123`
+- **Full CRUD** for delivery attempt records via REST API
+- **Multi-dimensional queries** - by event ID, user ID, channel, status, time range
+- **Optimized indexes** - `event_id`, `user_id`, `channel`, `status`, `created_at`
+- **Failed attempt filtering** - `since` and `limit` parameters for retry scheduler integration
+- **Liquibase-managed schema** - automated database migrations
+- **Hexagonal architecture** - clean separation of REST, persistence, and domain layers
 
-*   **`GET /api/v1/delivery-attempts/failed`**: Retrieves failed delivery attempts for retry processing.
-    *   **Query Parameters:**
-        *   `since` (ISO-8601 timestamp): Retrieve attempts since this time
-        *   `limit` (integer, default 100): Maximum number of results
-    *   **Response:** `List<DeliveryAttemptResponse>`
-    *   **Example:** `GET /api/v1/delivery-attempts/failed?since=2026-06-17T10:00:00Z&limit=50`
+---
 
-**Swagger Documentation:** `http://localhost:8003/swagger-ui.html`
+## Package Structure
 
-## Database Usage
+```
+delivery-tracker/
+└── src/main/java/delivery/
+    ├── DeliveryTrackerApplication.java
+    ├── application/
+    │   ├── CreateAttemptCommand.java          # Command model
+    │   └── DeliveryAttemptUseCase.java        # Business logic
+    └── adapter/
+        ├── postgres/
+        │   ├── entity/DeliveryAttemptEntity.java        # JPA entity
+        │   └── repository/DeliveryAttemptEntityRepository.java  # Spring Data JPA
+        └── rest/
+            ├── DeliveryAttemptController.java           # REST endpoints
+            ├── config/SwaggerConfig.java                # OpenAPI configuration
+            └── dto/
+                ├── CreateDeliveryAttemptRequest.java    # Incoming request DTO
+                └── DeliveryAttemptResponse.java         # Outgoing response DTO
+```
 
-*   **PostgreSQL:** Stores all delivery attempts with full audit trail.
-*   **`DeliveryAttemptEntity`**: The JPA entity representing a single delivery attempt.
-    *   **Fields:**
-        *   `id` (Long): Primary key, auto-generated
-        *   `eventId` (String): Reference to the notification event
-        *   `userId` (String): Reference to the recipient user
-        *   `eventType` (Enum): Type of event that triggered the notification
-        *   `channel` (Enum): Notification channel (EMAIL, SMS, PUSH, WEBHOOK)
-        *   `status` (Enum): Current status of the delivery attempt
-        *   `attemptNumber` (Integer): Which attempt number this is (1, 2, 3, etc.)
-        *   `messageId` (String): External message ID from the channel provider
-        *   `errorMessage` (String): Error details if delivery failed
-        *   `createdAt` (LocalDateTime): When the attempt was recorded
-        *   `updatedAt` (LocalDateTime): When the record was last updated
+---
 
-*   **Indexes:**
-    *   `idx_event_id`: Enables efficient queries by event ID
-    *   `idx_user_id`: Enables efficient queries by user ID
-    *   `idx_channel`: Enables efficient filtering by channel
-    *   `idx_status`: Enables efficient identification of failed attempts
-    *   `idx_created_at`: Enables time-range queries and pagination
+## APIs
 
-## Delivery Attempt Statuses
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/v1/delivery-attempts` | Record a new delivery attempt (201 Created) |
+| GET | `/api/v1/delivery-attempts/{attemptId}` | Get a single attempt by ID |
+| GET | `/api/v1/delivery-attempts/events/{eventId}` | Get all attempts for an event |
+| GET | `/api/v1/delivery-attempts/events/{eventId}/channels/{channel}` | Get attempts for event + channel |
+| GET | `/api/v1/delivery-attempts/users/{userId}` | Get all attempts for a user |
+| GET | `/api/v1/delivery-attempts/failed` | Get failed attempts (for retry scheduling) |
 
-*   **PENDING**: Delivery attempt is waiting to be processed
-*   **DELIVERED**: Notification was successfully delivered through the channel
-*   **FAILED**: Delivery attempt failed and will be retried
-*   **RETRYING**: Attempt is being retried after an earlier failure
-*   **DLQ**: Delivery exhausted all retries and moved to Dead Letter Queue
-*   **DROPPED**: Notification was dropped (e.g., duplicate, unsupported channel)
+### Query Parameters for Failed Attempts
 
-## Integration with Notification Service
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `since` | ISO-8601 timestamp | - | Retrieve attempts since this time |
+| `limit` | integer | 100 | Maximum number of results |
 
-The Delivery Tracker serves two primary functions for the notification service:
-
-1. **Recording Delivery Attempts**: After dispatching a notification through a channel, the notification service calls `POST /api/v1/delivery-attempts` to record the result.
-
-2. **Retrieving Failed Attempts**: The notification service's retry scheduler calls `GET /api/v1/delivery-attempts/failed` to identify attempts that need to be retried.
-
-## Configuration
-
-Key configurations can be overridden via environment variables or `application.yml`:
-
-| Configuration | Environment Variable | Default | Purpose |
-|---|---|---|---|
-| Server Port | `DELIVERY_TRACKER_PORT` | 8003 | HTTP port for the service |
-| Database URL | `DB_HOST` | `jdbc:postgresql://localhost:5432/notification?currentSchema=notification_schema` | PostgreSQL connection string |
-| Database User | `DB_USER` | `notif_user` | PostgreSQL username |
-| Database Password | `DB_PASSWORD` | (empty) | PostgreSQL password |
-
-Refer to the root `README.md` for a comprehensive list of all environment variables.
-
-## How to Run Locally
-
-Refer to the main `README.md` in the project root for detailed instructions on setting up prerequisites (Docker, Kafka, PostgreSQL, Redis), building the application, and starting individual services.
-
-## Example Usage
-
-### Record a Successful Email Delivery
+### Example: Record a Delivery Attempt
 
 ```bash
 curl -X POST http://localhost:8003/api/v1/delivery-attempts \
@@ -132,20 +93,148 @@ curl -X POST http://localhost:8003/api/v1/delivery-attempts \
   }'
 ```
 
-### Query All Attempts for an Event
+### Example: Query Attempts for an Event
 
 ```bash
 curl http://localhost:8003/api/v1/delivery-attempts/events/evt_001
 ```
 
-### Query Failed Attempts for Retry
+### Example: Query Failed Attempts for Retry
 
 ```bash
 curl "http://localhost:8003/api/v1/delivery-attempts/failed?since=2026-06-17T10:00:00Z&limit=100"
 ```
 
-### Query User's Recent Notifications
+### Example: Query User's Notifications
 
 ```bash
 curl http://localhost:8003/api/v1/delivery-attempts/users/usr_123
 ```
+
+**Swagger UI:** `http://localhost:8003/swagger-ui.html`
+
+---
+
+## Database
+
+### Schema
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | BIGINT (PK, auto) | Unique attempt identifier |
+| `event_id` | VARCHAR(255) | Notification event reference |
+| `user_id` | VARCHAR(255) | Recipient user reference |
+| `event_type` | VARCHAR(50) | Event type enum string |
+| `channel` | VARCHAR(50) | Notification channel (EMAIL, SMS, PUSH, WEBHOOK) |
+| `status` | VARCHAR(50) | Delivery status enum string |
+| `attempt_number` | INTEGER | Attempt sequence number |
+| `message_id` | VARCHAR(255) | External provider message ID |
+| `error_message` | TEXT | Error details (nullable) |
+| `created_at` | TIMESTAMP | Record creation time |
+| `updated_at` | TIMESTAMP | Last update time |
+
+### Indexes
+
+| Index | Columns | Purpose |
+|-------|---------|---------|
+| `idx_event_id` | `event_id` | Query attempts by event |
+| `idx_user_id` | `user_id` | Query attempts by user |
+| `idx_channel` | `channel` | Filter by channel |
+| `idx_status` | `status` | Identify failed attempts |
+| `idx_created_at` | `created_at` | Time-range queries |
+
+### Migrations
+
+Liquibase changelog: [`v1__create_delivery_attempts.xml`](src/main/resources/db/changelog/v1__create_delivery_attempts.xml)
+
+---
+
+## Delivery Attempt Statuses
+
+| Status | Description |
+|--------|-------------|
+| `PENDING` | Awaiting processing |
+| `DELIVERED` | Successfully delivered through the channel |
+| `FAILED` | Delivery failed, will be retried |
+| `RETRYING` | Being retried after a failure |
+| `DLQ` | Exhausted all retries, moved to dead letter queue |
+| `DROPPED` | Notification dropped (duplicate, unsupported channel, etc.) |
+
+---
+
+## Integration with Notification Service
+
+The Delivery Tracker serves two primary functions for the Notification Service:
+
+1. **Recording Delivery Attempts** - After dispatching a notification through a channel, the Notification Service calls `POST /api/v1/delivery-attempts` to persist the result.
+
+2. **Retrieving Failed Attempts** - The Notification Service's retry scheduler calls `GET /api/v1/delivery-attempts/failed` to identify attempts that need to be retried.
+
+---
+
+## Configuration
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DELIVERY_TRACKER_PORT` | `8003` | HTTP server port |
+| `DB_HOST` | `jdbc:postgresql://localhost:5432/notification?currentSchema=notification_schema` | PostgreSQL JDBC URL |
+| `DB_USER` | `notif_user` | Database username |
+| `DB_PASSWORD` | (empty) | Database password |
+
+---
+
+## Running Locally
+
+### Prerequisites
+
+- **PostgreSQL 16** (port 5432) - `brew services start postgresql`
+- Schema `notification_schema` must exist
+
+### Start the Service
+
+```bash
+# From the project root
+mvn spring-boot:run -pl delivery-tracker
+```
+
+### Build & Test
+
+```bash
+mvn clean compile -pl delivery-tracker
+mvn spring-boot:run -pl delivery-tracker
+```
+
+> The Delivery Tracker does NOT require Kafka or Redis. PostgreSQL is the only dependency.
+
+---
+
+## Docker
+
+The service does not have a standalone Dockerfile. Infrastructure dependencies are provided via the root [`docker-compose.yml`](../docker-compose.yml).
+
+---
+
+## Technology Stack
+
+| Category | Technology | Purpose |
+|----------|-----------|---------|
+| Framework | Spring Boot 3.3.0 | Application framework |
+| Database | PostgreSQL 16 | Delivery attempt persistence |
+| ORM | Spring Data JPA | Data access |
+| Migrations | Liquibase 4.31.1 | Schema management |
+| API Docs | Springdoc OpenAPI 2.1.0 | Swagger UI |
+| Build | Maven | Build & dependencies |
+
+---
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [**Root README**](../README.md) | Platform overview, architecture, setup |
+| [**Notification Service**](../notification-service/README.md) | Core orchestration service |
+| [**Template Service**](../template-service/README.md) | Template management and rendering |
+| [**Common Module**](../notification-platform-common/README.md) | Shared domain and infrastructure |
+| [**Startup Guide**](../STARTUP_GUIDE.md) | End-to-end local setup |
+| [**Contributing**](../CONTRIBUTING.md) | Contribution guidelines |
+| [**Security**](../SECURITY.md) | Security policy |

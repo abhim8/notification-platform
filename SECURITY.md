@@ -1,5 +1,7 @@
 # Security Policy
 
+> **Navigation:** [Root README](README.md) · [Notification Service](notification-service/README.md) · [Template Service](template-service/README.md) · [Delivery Tracker](delivery-tracker/README.md) · [Common](notification-platform-common/README.md) · [Startup Guide](STARTUP_GUIDE.md) · [Contributing](CONTRIBUTING.md)
+
 ## Supported Versions
 
 | Version | Supported |

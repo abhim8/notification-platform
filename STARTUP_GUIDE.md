@@ -1,4 +1,6 @@
-# Notification Platform - Setup & Startup Guide
+# Startup Guide
+
+> **Navigation:** [Root README](README.md) · [Notification Service](notification-service/README.md) · [Template Service](template-service/README.md) · [Delivery Tracker](delivery-tracker/README.md) · [Common](notification-platform-common/README.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md)
 
 ## Architecture Overview
 
